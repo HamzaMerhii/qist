@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-add { background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; font-weight: bold; }
+        .search-bar { margin-bottom: 20px; display: flex; gap: 10px; }
+        .search-bar input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .search-bar button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
+        th { background-color: #f8f9fa; }
+        .actions a { text-decoration: none; padding: 4px 8px; border-radius: 3px; font-size: 12px; margin-right: 5px; }
+        .btn-edit { background-color: #ffc107; color: #212529; }
+        .btn-delete { background-color: #dc3545; color: white; }
+        .pagination { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .pagination a { padding: 6px 12px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+        .low-stock { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Product Inventory</h2>
+        <a href="{% url 'product_create' %}" class="btn-add">+ Add Product</a>
+    </div>
+
+    <!-- Search Form -->
+    <form method="get" action="{% url 'product_list' %}" class="search-bar">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name or code...">
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in page_obj %}
+            <tr>
+                <td><strong>{{ product.code }}</strong></td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category.name|default:"Uncategorized" }}</td>
+                <td class="{% if product.stock_quantity <= 5 %}low-stock{% endif %}">
+                    {{ product.stock_quantity }}
+                </td>
+                <td class="actions">
+                    <a href="{% url 'product_update' product.pk %}" class="btn-edit">Edit</a>
+                    <a href="{% url 'product_delete' product.pk %}" class="btn-delete">Del</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center;">No products found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        <div>
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Previous</a>
+            {% endif %}
+        </div>
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        <div>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

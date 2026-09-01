@@ -6,7 +6,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Delete Product | QIST ERP</title>
+    <title>
+        {% if form.instance.pk %}Edit Product{% else %}Add Product{% endif %}
+        | QIST ERP
+    </title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
 
     <link rel="stylesheet" href="{% static 'css/products.css' %}">
 </head>
@@ -26,57 +34,57 @@
         <nav class="sidebar-menu">
 
             <a href="#">
-                <span class="menu-icon">▦</span>
+                <span class="material-symbols-outlined menu-icon">dashboard</span>
                 Dashboard
             </a>
 
             <a href="#">
-                <span class="menu-icon">👥</span>
+                <span class="material-symbols-outlined menu-icon">group</span>
                 Customers
             </a>
 
             <a href="{% url 'product_list' %}" class="active">
-                <span class="menu-icon">▣</span>
+                <span class="material-symbols-outlined menu-icon">inventory_2</span>
                 Products
             </a>
 
             <a href="{% url 'category_list' %}">
-                <span class="menu-icon">◈</span>
+                <span class="material-symbols-outlined menu-icon">category</span>
                 Categories
             </a>
 
             <a href="#">
-                <span class="menu-icon">🛒</span>
+                <span class="material-symbols-outlined menu-icon">shopping_cart</span>
                 Sales
             </a>
 
             <a href="#">
-                <span class="menu-icon">▤</span>
+                <span class="material-symbols-outlined menu-icon">calendar_month</span>
                 Installment Plans
             </a>
 
             <a href="#">
-                <span class="menu-icon">▣</span>
+                <span class="material-symbols-outlined menu-icon">payments</span>
                 Payments
             </a>
 
             <a href="#">
-                <span class="menu-icon">◷</span>
+                <span class="material-symbols-outlined menu-icon">schedule</span>
                 Overdue Payments
             </a>
 
             <a href="#">
-                <span class="menu-icon">▧</span>
+                <span class="material-symbols-outlined menu-icon">receipt_long</span>
                 Receipts
             </a>
 
             <a href="#">
-                <span class="menu-icon">↩</span>
+                <span class="material-symbols-outlined menu-icon">assignment_return</span>
                 Returns & Refunds
             </a>
 
             <a href="#">
-                <span class="menu-icon">▥</span>
+                <span class="material-symbols-outlined menu-icon">analytics</span>
                 Reports
             </a>
 
@@ -84,120 +92,209 @@
 
         <div class="sidebar-bottom">
             <a href="{% url 'logout' %}">
-                <span class="menu-icon">⇥</span>
+                <span class="material-symbols-outlined menu-icon">logout</span>
                 Logout
             </a>
         </div>
 
     </aside>
 
-
     <main class="main-content">
 
         <header class="topbar">
 
             <div class="topbar-left">
-
                 <div class="topbar-title">
                     Product Management
                 </div>
 
                 <div class="topbar-subtitle">
-                    Delete product
+                    Create and update product information
                 </div>
-
             </div>
 
-            <div class="user-info">
+            <div class="topbar-right">
 
-                <div class="user-avatar">
-                    {{ request.user.username|slice:":2"|upper }}
-                </div>
+                <div class="user-info">
 
-                <div class="user-details">
-                    <span class="user-name">
-                        {{ request.user.username }}
-                    </span>
+                    <div class="user-avatar">
+                        {{ request.user.username|slice:":2"|upper }}
+                    </div>
 
-                    <span class="user-role">
-                        Administrator
-                    </span>
+                    <div class="user-details">
+                        <span class="user-name">
+                            {{ request.user.username }}
+                        </span>
+
+                        <span class="user-role">
+                            Administrator
+                        </span>
+                    </div>
+
                 </div>
 
             </div>
 
         </header>
 
+        <section class="page-content form-page">
 
-        <section class="page-content delete-page">
+            <div class="form-page-header">
 
-            <div class="delete-card">
-
-                <div class="delete-icon">
-                    !
-                </div>
-
+                <a href="{% url 'product_list' %}" class="back-link">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Back to Products
+                </a>
 
                 <h1>
-                    Delete Product?
+                    {% if form.instance.pk %}
+                        Edit Product
+                    {% else %}
+                        Add New Product
+                    {% endif %}
                 </h1>
 
-
-                <p class="delete-warning">
-                    Are you sure you want to delete this product?
-                    This action cannot be undone.
+                <p>
+                    {% if form.instance.pk %}
+                        Update the product information below.
+                    {% else %}
+                        Enter the details for your new product.
+                    {% endif %}
                 </p>
 
+            </div>
 
-                <div class="delete-object-info">
+            <div class="form-card">
 
-                    <div class="delete-info-row">
-                        <span>Product</span>
-                        <strong>{{ product.name }}</strong>
-                    </div>
+                <div class="form-card-header">
 
+                    <div class="form-card-title">
 
-                    <div class="delete-info-row">
-                        <span>Category</span>
+                        <span class="material-symbols-outlined">
+                            inventory_2
+                        </span>
 
-                        <strong>
-                            {% if product.category %}
-                                {{ product.category.name }}
-                            {% else %}
-                                Uncategorized
-                            {% endif %}
-                        </strong>
+                        <div>
+                            <h2>Product Information</h2>
+                            <p>Fill in the product details below.</p>
+                        </div>
 
-                    </div>
-
-
-                    <div class="delete-info-row">
-                        <span>Stock Remaining</span>
-                        <strong>{{ product.stock_quantity }}</strong>
                     </div>
 
                 </div>
 
-
-                <form method="post">
+                <form method="post" class="qist-form">
 
                     {% csrf_token %}
 
-                    <div class="delete-actions">
+                    {% if form.non_field_errors %}
+                        <div class="form-alert form-alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-grid">
+
+                        <div class="form-group full-width">
+                            <label for="{{ form.name.id_for_label }}">
+                                Product Name
+                                <span class="required">*</span>
+                            </label>
+
+                            {{ form.name }}
+
+                            {% for error in form.name.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.category.id_for_label }}">
+                                Category
+                            </label>
+
+                            {{ form.category }}
+
+                            {% for error in form.category.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.cost.id_for_label }}">
+                                Cost
+                                <span class="required">*</span>
+                            </label>
+
+                            {{ form.cost }}
+
+                            {% for error in form.cost.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.price.id_for_label }}">
+                                Price
+                                <span class="required">*</span>
+                            </label>
+
+                            {{ form.price }}
+
+                            {% for error in form.price.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.stock_quantity.id_for_label }}">
+                                Stock Quantity
+                                <span class="required">*</span>
+                            </label>
+
+                            {{ form.stock_quantity }}
+
+                            {% for error in form.stock_quantity.errors %}
+                                <div class="field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions">
 
                         <a
                             href="{% url 'product_list' %}"
-                            class="secondary-btn"
+                            class="secondary-btn form-cancel-btn"
                         >
                             Cancel
                         </a>
 
-
                         <button
                             type="submit"
-                            class="danger-btn"
+                            class="primary-btn form-submit-btn"
                         >
-                            Yes, Delete Product
+                            <span class="material-symbols-outlined">
+                                {% if form.instance.pk %}save{% else %}add{% endif %}
+                            </span>
+
+                            {% if form.instance.pk %}
+                                Save Changes
+                            {% else %}
+                                Add Product
+                            {% endif %}
                         </button>
 
                     </div>

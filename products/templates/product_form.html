@@ -1,69 +1,215 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Product</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .full-width { grid-column: span 2; }
-        .form-group { margin-bottom: 5px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input[type="text"], input[type="number"], select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; grid-column: span 2; }
-        button { flex: 1; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; }
-        button:hover { background-color: #0056b3; }
-        .btn-cancel { text-align: center; line-height: 38px; text-decoration: none; background-color: #6c757d; color: white; border-radius: 4px; flex: 1; font-size: 15px; }
-        .btn-cancel:hover { background-color: #5a6268; }
-        .error { color: #dc3545; font-size: 12px; margin-top: 4px; }
-    </style>
+
+    <title>Delete Product | QIST ERP</title>
+
+    <link rel="stylesheet" href="{% static 'css/products.css' %}">
 </head>
+
 <body>
 
-<div class="card">
-    <h2>{% if form.instance.pk %}Edit Product{% else %}Add New Product{% endif %}</h2>
+<div class="app-layout">
 
-    <form method="post" class="form-grid">
-        {% csrf_token %}
-        
-        <div class="form-group full-width">
-            <label for="{{ form.name.id_for_label }}">Product Name</label>
-            {{ form.name }}
-            <div class="error">{{ form.name.errors.0 }}</div>
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <div class="logo">
+                QIST <span>ERP</span>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="{{ form.category.id_for_label }}">Category</label>
-            {{ form.category }}
-            <div class="error">{{ form.category.errors.0 }}</div>
+        <nav class="sidebar-menu">
+
+            <a href="#">
+                <span class="menu-icon">▦</span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">👥</span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}" class="active">
+                <span class="menu-icon">▣</span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="menu-icon">◈</span>
+                Categories
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">🛒</span>
+                Sales
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">▤</span>
+                Installment Plans
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">▣</span>
+                Payments
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">◷</span>
+                Overdue Payments
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">▧</span>
+                Receipts
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">↩</span>
+                Returns & Refunds
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">▥</span>
+                Reports
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="{% url 'logout' %}">
+                <span class="menu-icon">⇥</span>
+                Logout
+            </a>
         </div>
 
-        <div class="form-group">
-            <label for="{{ form.cash_price.id_for_label }}">Cost</label>
-            {{ form.cost }}
-            <div class="error">{{ form.cost.errors.0 }}</div>
-        </div>
-
-        <div class="form-group">
-            <label for="{{ form.cash_price.id_for_label }}">Price</label>
-            {{ form.price }}
-            <div class="error">{{ form.price.errors.0 }}</div>
-        </div>
+    </aside>
 
 
-        <div class="form-group">
-            <label for="{{ form.stock_quantity.id_for_label }}">Stock Quantity</label>
-            {{ form.stock_quantity }}
-            <div class="error">{{ form.stock_quantity.errors.0 }}</div>
-        </div>
+    <main class="main-content">
 
-        <div class="btn-group">
-            <button type="submit">Save</button>
-            <a href="{% url 'product_list' %}" class="btn-cancel">Cancel</a>
-        </div>
-    </form>
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <div class="topbar-title">
+                    Product Management
+                </div>
+
+                <div class="topbar-subtitle">
+                    Delete product
+                </div>
+
+            </div>
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
+                <div class="user-details">
+                    <span class="user-name">
+                        {{ request.user.username }}
+                    </span>
+
+                    <span class="user-role">
+                        Administrator
+                    </span>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="page-content delete-page">
+
+            <div class="delete-card">
+
+                <div class="delete-icon">
+                    !
+                </div>
+
+
+                <h1>
+                    Delete Product?
+                </h1>
+
+
+                <p class="delete-warning">
+                    Are you sure you want to delete this product?
+                    This action cannot be undone.
+                </p>
+
+
+                <div class="delete-object-info">
+
+                    <div class="delete-info-row">
+                        <span>Product</span>
+                        <strong>{{ product.name }}</strong>
+                    </div>
+
+
+                    <div class="delete-info-row">
+                        <span>Category</span>
+
+                        <strong>
+                            {% if product.category %}
+                                {{ product.category.name }}
+                            {% else %}
+                                Uncategorized
+                            {% endif %}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="delete-info-row">
+                        <span>Stock Remaining</span>
+                        <strong>{{ product.stock_quantity }}</strong>
+                    </div>
+
+                </div>
+
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <div class="delete-actions">
+
+                        <a
+                            href="{% url 'product_list' %}"
+                            class="secondary-btn"
+                        >
+                            Cancel
+                        </a>
+
+
+                        <button
+                            type="submit"
+                            class="danger-btn"
+                        >
+                            Yes, Delete Product
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+    </main>
+
 </div>
 
 </body>

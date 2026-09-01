@@ -1,91 +1,525 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-add { background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-        .search-bar { margin-bottom: 20px; display: flex; gap: 10px; }
-        .search-bar input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        .search-bar button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
-        th { background-color: #f8f9fa; }
-        .actions a { text-decoration: none; padding: 4px 8px; border-radius: 3px; font-size: 12px; margin-right: 5px; }
-        .btn-edit { background-color: #ffc107; color: #212529; }
-        .btn-delete { background-color: #dc3545; color: white; }
-        .pagination { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-        .pagination a { padding: 6px 12px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
-        .low-stock { color: #dc3545; font-weight: bold; }
-    </style>
+
+    <title>Products | QIST ERP</title>
+
+    <link rel="stylesheet" href="{% static 'css/products.css' %}">
 </head>
+
 <body>
 
-<div class="container">
-    <div class="header">
-        <h2>Product Inventory</h2>
-        <a href="{% url 'product_create' %}" class="btn-add">+ Add Product</a>
-    </div>
+<div class="app-layout">
 
-    <!-- Search Form -->
-    <form method="get" action="{% url 'product_list' %}" class="search-bar">
-        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name or code...">
-        <button type="submit">Search</button>
-    </form>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-    <!-- Table -->
-    <table>
-        <thead>
-            <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Stock</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in page_obj %}
-            <tr>
-                <td><strong>{{ product.code }}</strong></td>
-                <td>{{ product.name }}</td>
-                <td>{{ product.category.name|default:"Uncategorized" }}</td>
-                <td class="{% if product.stock_quantity <= 5 %}low-stock{% endif %}">
-                    {{ product.stock_quantity }}
-                </td>
-                <td class="actions">
-                    <a href="{% url 'product_update' product.pk %}" class="btn-edit">Edit</a>
-                    <a href="{% url 'product_delete' product.pk %}" class="btn-delete">Del</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" style="text-align: center;">No products found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <!-- Pagination -->
-    {% if page_obj.has_other_pages %}
-    <div class="pagination">
-        <div>
-            {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Previous</a>
-            {% endif %}
+        <div class="sidebar-header">
+            <div class="logo">
+                QIST <span>ERP</span>
+            </div>
         </div>
-        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-        <div>
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next</a>
-            {% endif %}
+
+        <nav class="sidebar-menu">
+
+            <a href="#">
+                <span class="menu-icon">▦</span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">👥</span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}" class="active">
+                <span class="menu-icon">▣</span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="menu-icon">◈</span>
+                Categories
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">🛒</span>
+                Sales
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">▤</span>
+                Installment Plans
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">▣</span>
+                Payments
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">◷</span>
+                Overdue Payments
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">▧</span>
+                Receipts
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">↩</span>
+                Returns & Refunds
+            </a>
+
+            <a href="#">
+                <span class="menu-icon">▥</span>
+                Reports
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="{% url 'logout' %}">
+                <span class="menu-icon">⇥</span>
+                Logout
+            </a>
         </div>
-    </div>
-    {% endif %}
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <div class="topbar-left">
+                <div class="topbar-title">
+                    Product Management
+                </div>
+
+                <div class="topbar-subtitle">
+                    Manage your inventory and pricing
+                </div>
+            </div>
+
+            <div class="topbar-right">
+
+                <button class="notification-btn" type="button">
+                    🔔
+                </button>
+
+                <div class="user-info">
+
+                    <div class="user-avatar">
+                        {{ request.user.username|slice:":2"|upper }}
+                    </div>
+
+                    <div class="user-details">
+                        <span class="user-name">
+                            {{ request.user.username }}
+                        </span>
+
+                        <span class="user-role">
+                            Administrator
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE CONTENT -->
+        <section class="page-content">
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+
+                <div class="page-title">
+                    <h1>Products</h1>
+
+                    <p>
+                        Manage product information, categories,
+                        pricing, cost, and stock.
+                    </p>
+                </div>
+
+                <a href="{% url 'product_create' %}" class="primary-btn">
+                    + Add Product
+                </a>
+
+            </div>
+
+
+            <!-- STATS -->
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-card-content">
+                        <span class="stat-label">
+                            Total Products
+                        </span>
+
+                        <span class="stat-value">
+                            {{ page_obj.paginator.count }}
+                        </span>
+
+                        <span class="stat-description">
+                            Products matching current search
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        ▣
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-card-content">
+                        <span class="stat-label">
+                            Inventory
+                        </span>
+
+                        <span class="stat-value">
+                            Tracked
+                        </span>
+
+                        <span class="stat-description">
+                            Stock quantity tracked per product
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        ✓
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-card-content">
+                        <span class="stat-label">
+                            Categories
+                        </span>
+
+                        <span class="stat-value">
+                            Managed
+                        </span>
+
+                        <span class="stat-description">
+                            Products organized by category
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        ◈
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- INVENTORY CARD -->
+            <div class="inventory-card">
+
+                <div class="inventory-card-header">
+                    <h2>Product Inventory</h2>
+
+                    <p>
+                        View and manage your available products.
+                    </p>
+                </div>
+
+
+                <!-- SEARCH -->
+                <div class="toolbar">
+
+                    <form
+                        method="get"
+                        action="{% url 'product_list' %}"
+                        class="search-wrapper"
+                    >
+
+                        <span class="search-icon">
+                            🔍
+                        </span>
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search_query }}"
+                            placeholder="Search by product name..."
+                        >
+
+                    </form>
+
+
+                    <div class="filter-group">
+
+                        {% if search_query %}
+                            <a
+                                href="{% url 'product_list' %}"
+                                class="secondary-btn"
+                            >
+                                Clear Search
+                            </a>
+                        {% endif %}
+
+                        <a
+                            href="{% url 'category_list' %}"
+                            class="secondary-btn"
+                        >
+                            Categories
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TABLE -->
+                <div class="table-wrapper">
+
+                    <table class="products-table">
+
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Cost</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Availability</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                        {% for product in page_obj %}
+
+                            <tr>
+
+                                <td>
+                                    <span class="product-id">
+                                        PRD-{{ product.id }}
+                                    </span>
+                                </td>
+
+
+                                <td>
+                                    <span class="product-name">
+                                        {{ product.name }}
+                                    </span>
+                                </td>
+
+
+                                <td>
+                                    {% if product.category %}
+                                        {{ product.category.name }}
+                                    {% else %}
+                                        Uncategorized
+                                    {% endif %}
+                                </td>
+
+
+                                <td>
+                                    ${{ product.cost|floatformat:2 }}
+                                </td>
+
+
+                                <td>
+                                    <span class="product-price">
+                                        ${{ product.price|floatformat:2 }}
+                                    </span>
+                                </td>
+
+
+                                <td>
+                                    {{ product.stock_quantity }}
+                                </td>
+
+
+                                <td>
+
+                                    {% if product.stock_quantity == 0 %}
+
+                                        <span class="status-badge status-out-of-stock">
+                                            Out of Stock
+                                        </span>
+
+                                    {% elif product.stock_quantity <= 5 %}
+
+                                        <span class="status-badge status-low-stock">
+                                            Low Stock
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-badge status-in-stock">
+                                            In Stock
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="actions">
+
+                                        <a
+                                            href="{% url 'product_update' product.pk %}"
+                                            class="action-btn"
+                                            title="Edit Product"
+                                        >
+                                            ✎
+                                        </a>
+
+                                        <a
+                                            href="{% url 'product_delete' product.pk %}"
+                                            class="action-btn delete"
+                                            title="Delete Product"
+                                        >
+                                            🗑
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td colspan="8">
+
+                                    <div class="empty-state">
+
+                                        <div class="empty-state-icon">
+                                            ▣
+                                        </div>
+
+                                        {% if search_query %}
+
+                                            <h3>No products found</h3>
+
+                                            <p>
+                                                No products match
+                                                "{{ search_query }}".
+                                            </p>
+
+                                            <a
+                                                href="{% url 'product_list' %}"
+                                                class="primary-btn"
+                                            >
+                                                Clear Search
+                                            </a>
+
+                                        {% else %}
+
+                                            <h3>No products yet</h3>
+
+                                            <p>
+                                                Add your first product
+                                                to start managing inventory.
+                                            </p>
+
+                                            <a
+                                                href="{% url 'product_create' %}"
+                                                class="primary-btn"
+                                            >
+                                                Add Product
+                                            </a>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- PAGINATION -->
+                {% if page_obj.has_other_pages %}
+
+                    <div class="pagination-wrapper">
+
+                        <div class="pagination-info">
+                            Page {{ page_obj.number }}
+                            of {{ page_obj.paginator.num_pages }}
+                            · {{ page_obj.paginator.count }} products
+                        </div>
+
+
+                        <div class="pagination">
+
+                            {% if page_obj.has_previous %}
+
+                                <a
+                                    href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                                >
+                                    Previous
+                                </a>
+
+                            {% endif %}
+
+
+                            <span class="active">
+                                {{ page_obj.number }}
+                            </span>
+
+
+                            {% if page_obj.has_next %}
+
+                                <a
+                                    href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                                >
+                                    Next
+                                </a>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </main>
+
 </div>
 
 </body>

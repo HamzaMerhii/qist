@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Installment Plans</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f6f9; }
+        .card { background: white; padding: 20px; border-radius: 6px; max-width: 900px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .search-form { margin: 15px 0; display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; font-size: 14px; }
+        th { background: #f8f9fa; }
+        .btn { padding: 5px 10px; text-decoration: none; border-radius: 4px; color: white; background: #007bff; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header">
+        <h2>Installment Plans</h2>
+    </div>
+
+    <form method="get" class="search-form">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search sale ID, customer name, status...">
+        <button type="submit" style="padding: 8px 15px;">Search</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Plan #</th>
+                <th>Sale #</th>
+                <th>Customer</th>
+                <th>Frequency</th>
+                <th>Remaining</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plan in page_obj %}
+            <tr>
+                <td><strong>#{{ plan.id }}</strong></td>
+                <td>Sale #{{ plan.sale.id }}</td>
+                <td>{{ plan.sale.customer.full_name }}</td>
+                <td>{{ plan.frequency }}</td>
+                <td>${{ plan.remaining_balance }}</td>
+                <td><strong>{{ plan.status }}</strong></td>
+                <td>
+                    <a href="{% url 'installments:plan_detail' plan.pk %}" class="btn">View Schedule</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center;">No plans found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

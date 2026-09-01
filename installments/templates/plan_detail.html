@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plan #{{ plan.id }} Details</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f6f9; }
+        .card { background: white; padding: 25px; border-radius: 6px; max-width: 800px; margin: auto; }
+        .info { background: #e9ecef; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
+        .status-PAID { color: green; font-weight: bold; }
+        .status-PENDING { color: #d9534f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Installment Plan #{{ plan.id }} Schedule</h2>
+    
+    <div class="info">
+        <strong>Customer:</strong> {{ plan.sale.customer.full_name }}<br>
+        <strong>Sale Amount:</strong> ${{ plan.sale.total_amount }} | 
+        <strong>Down Payment:</strong> ${{ plan.down_payment }} | 
+        <strong>Remaining:</strong> ${{ plan.remaining_balance }}<br>
+        <strong>Frequency:</strong> {{ plan.frequency }} | 
+        <strong>Status:</strong> {{ plan.status }}
+    </div>
+
+    <h3>Payment Schedule</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Seq #</th>
+                <th>Due Date</th>
+                <th>Amount Due</th>
+                <th>Status</th>
+                <th>Late Fee</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in installments %}
+            <tr>
+                <td>#{{ item.sequence_number }}</td>
+                <td>{{ item.due_date }}</td>
+                <td>${{ item.amount_due }}</td>
+                <td class="status-{{ item.status }}">{{ item.status }}</td>
+                <td>${{ item.late_fee }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

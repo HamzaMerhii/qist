@@ -305,3 +305,12 @@ def sale_return_detail(request, pk):
             "return_items": return_items,
         },
     )
+
+@login_required
+def printable_sale_receipt(request, sale_id):
+    """Clean, print-optimized receipt view for a completed sale."""
+    sale = get_object_or_404(
+        Sale.objects.prefetch_related("items__product"), 
+        pk=sale_id
+    )
+    return render(request, "sale_receipt.html", {"sale": sale})

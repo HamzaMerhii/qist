@@ -11,4 +11,5 @@ urlpatterns = [
     path("payments/", views.payment_ledger, name="payment_ledger"),
     path("overdue/", views.overdue_payments, name="overdue_payments"),
     path("payments/<int:payment_id>/pay/", views.mark_payment_paid, name="mark_payment_paid"),
+    path("payments/<int:payment_id>/receipt/", views.printable_payment_receipt, name="payment_receipt"),
 ]

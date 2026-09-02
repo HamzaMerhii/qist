@@ -63,7 +63,6 @@ def create_plan_for_sale(request, sale_id):
             plan.sale = sale
             plan.total_amount = sale.total_amount
             
-            # Guarantee number_of_months is at least 1
             months = max(1, plan.number_of_months or 1)
             plan.number_of_months = months
 
@@ -76,9 +75,8 @@ def create_plan_for_sale(request, sale_id):
 
             plan.remaining_balance = remaining_balance
             plan.status = "ACTIVE"
-            plan.save()  # MUST SAVE BEFORE CREATING PAYMENTS FOR FOREIGNKEY RELATIONS
+            plan.save() 
 
-            # Calculate installments
             monthly_amount = round(remaining_balance / Decimal(str(months)), 2)
             start_date = plan.start_date or date.today()
 
@@ -101,7 +99,6 @@ def create_plan_for_sale(request, sale_id):
                     )
                 )
 
-            # Bulk insert payments directly into database
             InstallmentPayment.objects.bulk_create(payments_to_create)
 
             messages.success(request, f"Installment plan created with {months} monthly payments.")
@@ -144,11 +141,9 @@ def record_payment(request, payment_id):
         payment.paid_date = date.today()
         payment.save()
 
-        # Update remaining balance on plan
         plan = payment.plan
         plan.remaining_balance = max(Decimal("0.00"), plan.remaining_balance - payment.amount_due)
         
-        # Check if entire plan is settled
         if not plan.payments.filter(status="PENDING").exists():
             plan.status = "COMPLETED"
         
@@ -229,7 +224,6 @@ def mark_payment_paid(request, payment_id):
         payment.paid_date = date.today()
         payment.save()
         
-        # Check if all payments in the plan are complete
         plan = payment.plan
         if not plan.payments.filter(status="PENDING").exists():
             plan.status = "COMPLETED"
@@ -237,6 +231,14 @@ def mark_payment_paid(request, payment_id):
             
         messages.success(request, f"Payment #{payment.installment_number} marked as PAID.")
     
-    # Redirect back to referring page or ledger
     next_url = request.POST.get("next", "installments:payment_ledger")
     return redirect(next_url)
+
+@login_required
+def printable_payment_receipt(request, payment_id):
+    """Clean, print-optimized receipt for an installment payment collection."""
+    payment = get_object_or_404(
+        InstallmentPayment.objects.select_related("plan__sale__customer"), 
+        pk=payment_id
+    )
+    return render(request, "payment_receipt.html", {"payment": payment})

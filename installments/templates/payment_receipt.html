@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Receipt #{{ payment.id }} - Qist ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: #fff !important; }
+            .receipt-card { border: none !important; shadow: none !important; }
+        }
+        .receipt-card { max-width: 500px; margin: 0 auto; }
+    </style>
+</head>
+<body class="bg-light py-4">
+
+<div class="container">
+    <div class="text-center mb-3 no-print">
+        <button onclick="window.print()" class="btn btn-success btn-sm me-2">Print Receipt</button>
+        <a href="{% url 'installments:payment_ledger' %}" class="btn btn-outline-secondary btn-sm">&larr; Back to Ledger</a>
+    </div>
+
+    <div class="card receipt-card shadow-sm border-0 p-4">
+        <div class="text-center mb-3">
+            <h4 class="fw-bold mb-0">QIST ERP STORE</h4>
+            <p class="text-muted small mb-0">Installment Payment Receipt</p>
+            <hr>
+        </div>
+
+        <div class="small mb-3">
+            <div class="d-flex justify-content-between mb-1">
+                <span>Receipt Number:</span>
+                <strong>PAY-{{ payment.id }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+                <span>Payment Date:</span>
+                <strong>{{ payment.paid_date|default:payment.due_date }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+                <span>Customer:</span>
+                <strong>{{ payment.plan.sale.customer.full_name|default:"Guest" }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+                <span>Plan Reference:</span>
+                <strong>Plan #{{ payment.plan.id }}</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Installment #:</span>
+                <strong>#{{ payment.installment_number }}</strong>
+            </div>
+        </div>
+
+        <div class="border-top border-bottom py-2 my-3">
+            <div class="d-flex justify-content-between fw-bold text-success fs-5">
+                <span>Amount Paid:</span>
+                <span>${{ payment.amount_due }}</span>
+            </div>
+        </div>
+
+        <div class="text-center text-muted small mt-4">
+            <p class="mb-0">Payment successfully recorded.</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

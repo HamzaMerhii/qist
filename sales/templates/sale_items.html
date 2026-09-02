@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Items for Sale #{{ sale.pk }}</title>
+</head>
+<body>
+    <main>
+        <p><a href="{% url 'sales:sale_detail' sale.pk %}">&larr; Back to sale</a></p>
+        <h1>Items for Sale #{{ sale.pk }}</h1>
+        <p>Customer: {{ sale.customer.full_name }}</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unit_price|floatformat:2 }}</td>
+                        <td>{{ item.total|floatformat:2 }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4">This sale has no items.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

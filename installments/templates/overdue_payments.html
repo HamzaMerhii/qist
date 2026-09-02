@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Overdue Payments - Qist ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-danger mb-1">Overdue Payments Queue</h2>
+            <p class="text-muted small mb-0">Payments that have passed their scheduled due date.</p>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm border-0 border-top border-danger border-3">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Customer</th>
+                            <th>Email</th>
+                            <th>Inst. #</th>
+                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in overdue_list %}
+                        <tr>
+                            <td class="ps-3 fw-bold">{{ payment.plan.sale.customer.full_name|default:"N/A" }}</td>
+                            <td>{{ payment.plan.sale.customer.email|default:"No Email" }}</td>
+                            <td>#{{ payment.installment_number }}</td>
+                            <td class="fw-bold text-danger">${{ payment.amount_due }}</td>
+                            <td>{{ payment.due_date }}</td>
+                            <td class="text-end pe-3">
+                                <form method="post" action="{% url 'installments:mark_payment_paid' payment.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <button type="submit" class="btn btn-sm btn-success me-1">Mark Paid</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-success font-semibold">No overdue payments! All accounts are up to date.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

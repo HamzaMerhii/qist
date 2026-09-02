@@ -1,81 +1,80 @@
+<!-- customers/templates/customers/customer_list.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Customers</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f6f9; }
-        .card { background: white; padding: 20px; border-radius: 6px; max-width: 900px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; }
-        .btn { padding: 8px 12px; text-decoration: none; border-radius: 4px; color: white; font-size: 14px; }
-        .btn-add { background: #28a745; }
-        .btn-edit { background: #ffc107; color: black; }
-        .btn-del { background: #dc3545; }
-        .search-form { margin: 15px 0; display: flex; gap: 10px; }
-        input[type="text"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        .pagination { display: flex; justify-content: space-between; margin-top: 15px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Directory - Qist ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
 
-<div class="card">
-    <div class="header">
-        <h2>Customers List</h2>
-        <a href="{% url 'customers:customer_create' %}" class="btn btn-add">+ Add Customer</a>
+<body class="bg-light">
+
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Customer Directory</h2>
+                <p class="text-muted small mb-0">View customer records, lifetime spent, and active installment plans.
+                </p>
+            </div>
+            <a href="{% url 'customers:customer_create' %}" class="btn btn-primary fw-semibold">+ Add New Customer</a>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th class="text-end pe-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Update line in table body -->
+                            {% for customer in page_obj %}
+                            <tr>
+                                <td class="ps-3 fw-bold text-dark">{{ customer.full_name }}</td>
+                                <td>{{ customer.phone|default:"--" }}</td>
+                                <td>{{ customer.email|default:"--" }}</td>
+                                <td>{{ customer.address|truncatechars:30|default:"--" }}</td>
+                                <td class="text-end pe-3">
+                                    <a href="{% url 'customers:customer_detail' customer.pk %}"
+                                        class="btn btn-sm btn-info text-white me-1">
+                                        Details
+                                    </a>
+                                    <a href="{% url 'customers:customer_update' customer.pk %}"
+                                        class="btn btn-sm btn-outline-secondary">
+                                        Edit
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">No customers found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <form method="get" class="search-form">
-        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, phone, or email...">
-        <button type="submit" style="padding: 8px 15px;">Search</button>
-    </form>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Full Name</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Address</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for customer in page_obj %}
-            <tr>
-                <td><strong>{{ customer.full_name }}</strong></td>
-                <td>{{ customer.phone }}</td>
-                <td>{{ customer.email|default:"-" }}</td>
-                <td>{{ customer.address|default:"-" }}</td>
-                <td>
-                    <a href="{% url 'customers:customer_update' customer.pk %}" class="btn btn-edit">Edit</a>
-                    <a href="{% url 'customers:customer_delete' customer.pk %}" class="btn btn-del">Delete</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" style="text-align: center;">No customers found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    {% if page_obj.has_other_pages %}
-    <div class="pagination">
-        {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">Previous</a>
-        {% else %}<span></span>{% endif %}
-        
-        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">Next</a>
-        {% else %}<span></span>{% endif %}
-    </div>
-    {% endif %}
-</div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

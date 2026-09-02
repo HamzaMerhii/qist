@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Return Sale #{{ sale.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 20px; }
+        .card { background: white; padding: 25px; border-radius: 6px; max-width: 800px; margin: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
+        .btn-danger { padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-secondary { padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin-left: 10px; }
+        .alert-error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Process Return - Sale #{{ sale.id }}</h2>
+    <p><strong>Customer:</strong> {{ sale.customer.full_name }}</p>
+
+    {% if error %}
+        <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin-bottom: 15px;">
+            <label for="reason"><strong>Return Reason:</strong></label><br>
+            <input type="text" id="reason" name="reason" style="width: 100%; padding: 8px; margin-top: 5px;" placeholder="Damaged product, wrong item, customer request..." required>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Product</th>
+                    <th>Purchased Qty</th>
+                    <th>Unit Price</th>
+                    <th>Qty to Return</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td><input type="checkbox" name="item_{{ item.pk }}"></td>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.unit_price }}</td>
+                    <td>
+                        <input type="number" name="quantity_{{ item.pk }}" min="1" max="{{ item.quantity }}" value="{{ item.quantity }}" style="width: 70px;">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn-danger">Confirm Return & Restock</button>
+        <a href="{% url 'sales:sale_detail' sale.pk %}" class="btn-secondary">Cancel</a>
+    </form>
+</div>
+
+</body>
+</html>

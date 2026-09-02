@@ -1,52 +1,50 @@
-from decimal import Decimal
 from django.db import models
 from sales.models import Sale
 
 
 class InstallmentPlan(models.Model):
-    sale = models.ForeignKey(
-        Sale,
-        on_delete=models.CASCADE,
-        related_name="installment_plans",
+    STATUS_CHOICES = [
+        ("ACTIVE", "Active"),
+        ("COMPLETED", "Completed"),
+        ("CANCELLED", "Cancelled"),
+    ]
+
+    sale = models.OneToOneField(
+        Sale, on_delete=models.CASCADE, related_name="installment_plan"
     )
-    total_installments = models.PositiveIntegerField()
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     down_payment = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=Decimal("0.00"),
+        max_digits=10, decimal_places=2, default=0.00
     )
-    remaining_balance = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.CharField(max_length=50, default="ACTIVE")  # ACTIVE, COMPLETED, CANCELLED
+    remaining_balance = models.DecimalField(max_digits=10, decimal_places=2)
+    number_of_months = models.IntegerField(default=1)
+    start_date = models.DateField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="ACTIVE"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        db_table = "installment_plans"
-        ordering = ["-created_at"]
-
     def __str__(self):
-        return f"Plan #{self.id} (Sale #{self.sale_id})"
+        return f"Plan for Sale #{self.sale_id}"
 
 
-class Installment(models.Model):
+class InstallmentPayment(models.Model):
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
+        ("PAID", "Paid"),
+        ("OVERDUE", "Overdue"),
+    ]
+
     plan = models.ForeignKey(
-        InstallmentPlan,
-        on_delete=models.CASCADE,
-        related_name="installments",
+        InstallmentPlan, on_delete=models.CASCADE, related_name="payments"
     )
-    sequence_number = models.PositiveIntegerField()
-    amount_due = models.DecimalField(max_digits=12, decimal_places=2)
+    installment_number = models.IntegerField()
+    amount_due = models.DecimalField(max_digits=10, decimal_places=2)
     due_date = models.DateField()
-    status = models.CharField(max_length=50, default="PENDING")  # PENDING, PAID, OVERDUE
-    late_fee = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=Decimal("0.00"),
+    paid_date = models.DateField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="PENDING"
     )
-    original_due_date = models.DateField()
-
-    class Meta:
-        db_table = "installments"
-        ordering = ["sequence_number"]
 
     def __str__(self):
-        return f"Installment #{self.sequence_number} for Plan #{self.plan_id}"
+        return f"Payment #{self.installment_number} for Plan #{self.plan_id}"

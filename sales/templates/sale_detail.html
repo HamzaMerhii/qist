@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sale #{{ sale.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f6f9; }
+        .card { background: white; padding: 25px; border-radius: 6px; max-width: 800px; margin: auto; }
+        .info { background: #e9ecef; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
+        .btn { padding: 8px 12px; text-decoration: none; border-radius: 4px; color: white; font-size: 13px; }
+        .btn-return { background: #dc3545; }
+        .btn-back { background: #6c757d; }
+        .actions { margin-top: 20px; display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Order #{{ sale.id }} Details</h2>
+    
+    <div class="info">
+        <strong>Customer:</strong> {{ sale.customer.full_name }} ({{ sale.customer.phone }})<br>
+        <strong>Payment Type:</strong> {{ sale.payment_type }} | <strong>Status:</strong> {{ sale.status }}<br>
+        <strong>Subtotal:</strong> ${{ sale.subtotal }} | <strong>Discount:</strong> ${{ sale.discount }} | <strong>Tax:</strong> ${{ sale.tax }}<br>
+        <strong>Total Amount:</strong> ${{ sale.total_amount }}
+    </div>
+
+    <h3>Items Purchased</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.unit_price }}</td>
+                <td>${{ item.total }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No items attached to this sale.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="actions">
+        <a href="{% url 'sales:sale_return' sale.pk %}" class="btn btn-return">Process Return</a>
+        <a href="{% url 'sales:sale_list' %}" class="btn btn-back">Back to Sales</a>
+    </div>
+</div>
+
+</body>
+</html>

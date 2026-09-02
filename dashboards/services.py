@@ -160,19 +160,7 @@ def get_admin_dashboard_context():
             "total_users": user_model.objects.count(),
             "active_users": user_model.objects.filter(is_active=True).count(),
             "admin_users": role_counts.get(UserProfile.Role.ADMIN, 0),
-            "manager_users": role_counts.get(UserProfile.Role.MANAGER, 0),
             "cashier_users": role_counts.get(UserProfile.Role.CASHIER, 0),
-        }
-    )
-    return context
-
-
-def get_manager_dashboard_context():
-    context = _operations_context()
-    context.update(
-        {
-            "page_title": "Manager Operations Overview",
-            "current_role": UserProfile.Role.MANAGER,
         }
     )
     return context

@@ -94,8 +94,6 @@ def redirect_by_role(user):
         role = user.profile.role
         if role == "ADMIN":
             return redirect("admin_dashboard")
-        elif role == "MANAGER":
-            return redirect("manager_dashboard")
 
     # Default fallback for cashiers
     return redirect("sales_dashboard")

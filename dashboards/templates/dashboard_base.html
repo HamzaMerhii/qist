@@ -15,8 +15,6 @@
             <nav aria-label="Main navigation">
                 {% if current_role == "ADMIN" %}
                     <a class="active" href="{% url 'admin_dashboard' %}">Overview</a>
-                {% elif current_role == "MANAGER" %}
-                    <a class="active" href="{% url 'manager_dashboard' %}">Overview</a>
                 {% else %}
                     <a class="active" href="{% url 'sales_dashboard' %}">Overview</a>
                 {% endif %}

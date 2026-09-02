@@ -7,7 +7,6 @@ from django.dispatch import receiver
 class UserProfile(models.Model):
     class Role(models.TextChoices):
         ADMIN = "ADMIN", "Admin"
-        MANAGER = "MANAGER", "Manager"
         CASHIER = "CASHIER", "Cashier"
 
     user = models.OneToOneField(

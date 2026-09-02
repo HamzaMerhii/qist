@@ -22,13 +22,6 @@ class DashboardTestCase(TestCase):
             username="dashboard_admin",
             password="test-password",
         )
-        cls.manager = user_model.objects.create_user(
-            username="dashboard_manager",
-            password="test-password",
-        )
-        cls.manager.profile.role = UserProfile.Role.MANAGER
-        cls.manager.profile.save(update_fields=["role"])
-
         cls.cashier = user_model.objects.create_user(
             username="dashboard_cashier",
             password="test-password",
@@ -117,25 +110,17 @@ class DashboardTestCase(TestCase):
             f"{reverse('users:login')}?next={dashboard_url}",
         )
 
-    def test_admin_can_open_all_dashboards(self):
+    def test_admin_can_open_dashboards(self):
         self.client.force_login(self.admin)
 
-        for url_name in ("admin_dashboard", "manager_dashboard", "sales_dashboard"):
+        for url_name in ("admin_dashboard", "sales_dashboard"):
             with self.subTest(url_name=url_name):
                 self.assertEqual(self.client.get(reverse(url_name)).status_code, 200)
-
-    def test_manager_cannot_open_admin_dashboard(self):
-        self.client.force_login(self.manager)
-
-        self.assertEqual(self.client.get(reverse("admin_dashboard")).status_code, 403)
-        self.assertEqual(self.client.get(reverse("manager_dashboard")).status_code, 200)
-        self.assertEqual(self.client.get(reverse("sales_dashboard")).status_code, 200)
 
     def test_cashier_can_only_open_cashier_dashboard(self):
         self.client.force_login(self.cashier)
 
         self.assertEqual(self.client.get(reverse("admin_dashboard")).status_code, 403)
-        self.assertEqual(self.client.get(reverse("manager_dashboard")).status_code, 403)
         self.assertEqual(self.client.get(reverse("sales_dashboard")).status_code, 200)
 
     def test_user_with_unknown_role_is_denied(self):
@@ -170,7 +155,6 @@ class DashboardTestCase(TestCase):
         self.assertEqual(response.context["inventory_cost_value"], Decimal("30.00"))
         self.assertEqual(response.context["inventory_retail_value"], Decimal("45.00"))
         self.assertEqual(response.context["admin_users"], 1)
-        self.assertEqual(response.context["manager_users"], 1)
         self.assertEqual(response.context["cashier_users"], 1)
 
     def test_cashier_context_excludes_management_totals(self):

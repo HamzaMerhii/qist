@@ -49,8 +49,6 @@
                             <td>
                                 {% if u.profile.role == 'ADMIN' %}
                                     <span class="badge bg-danger">Admin</span>
-                                {% elif u.profile.role == 'MANAGER' %}
-                                    <span class="badge bg-warning text-dark">Manager</span>
                                 {% else %}
                                     <span class="badge bg-info text-dark">Cashier</span>
                                 {% endif %}

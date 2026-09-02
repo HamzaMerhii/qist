@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Users - QIST Management{% endblock %}
+{% block content %}
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900">Users</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Manage staff accounts and their roles.</p>
+  </div>
+  <a href="{% url 'user_create' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5">
+    <span class="material-symbols-outlined text-[18px]">person_add</span> Add User
+  </a>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+  <table class="w-full text-left min-w-[700px]">
+    <thead><tr class="bg-slate-50 border-b border-slate-200">
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Username</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Email</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Role</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Status</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4 text-right">Actions</th>
+    </tr></thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for profile in profiles %}
+      <tr class="hover:bg-slate-50">
+        <td class="py-3 px-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">{{ profile.user.username|slice:":2"|upper }}</div>
+            <span class="text-sm font-semibold text-slate-800">{{ profile.user.username }}</span>
+            {% if profile.user == request.user %}<span class="text-[10px] text-slate-400">(you)</span>{% endif %}
+          </div>
+        </td>
+        <td class="py-3 px-4 text-sm text-slate-500">{{ profile.user.email|default:"—" }}</td>
+        <td class="py-3 px-4">
+          <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold
+            {% if profile.role == 'ADMIN' %}bg-indigo-50 text-indigo-700
+            {% elif profile.role == 'MANAGER' %}bg-violet-50 text-violet-700
+            {% else %}bg-slate-100 text-slate-600{% endif %}">{{ profile.get_role_display }}</span>
+        </td>
+        <td class="py-3 px-4">
+          <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold {% if profile.user.is_active %}bg-emerald-50 text-emerald-700{% else %}bg-rose-50 text-rose-700{% endif %}">
+            {{ profile.user.is_active|yesno:"Active,Inactive" }}
+          </span>
+        </td>
+        <td class="py-3 px-4 text-right">
+          <div class="flex items-center justify-end gap-1">
+            <a href="{% url 'user_edit_role' profile.pk %}" class="p-1.5 rounded text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition-colors" title="Edit role">
+              <span class="material-symbols-outlined text-[18px]">edit</span>
+            </a>
+            {% if profile.user != request.user %}
+            <form method="post" action="{% url 'user_toggle_active' profile.pk %}" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="p-1.5 rounded text-slate-500 hover:bg-slate-100 hover:text-rose-600 transition-colors" title="{% if profile.user.is_active %}Deactivate{% else %}Activate{% endif %}">
+                <span class="material-symbols-outlined text-[18px]">{% if profile.user.is_active %}block{% else %}check_circle{% endif %}</span>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="py-10 px-4 text-center text-sm text-slate-400">No users found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

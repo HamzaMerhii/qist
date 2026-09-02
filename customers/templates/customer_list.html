@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Customers - QIST Management{% endblock %}
+
+{% block content %}
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900">Customers</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Manage and track your customer accounts and installment histories.</p>
+  </div>
+  <a href="{% url 'customer_create' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5">
+    <span class="material-symbols-outlined text-[18px]">add</span> Add Customer
+  </a>
+</div>
+
+<form method="get" class="bg-white p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row gap-3 items-start sm:items-center mb-5">
+  <div class="relative w-full sm:w-72">
+    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+    <input type="text" name="search" value="{{ search_query }}" class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500" placeholder="Search customers...">
+  </div>
+  <button type="submit" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">Search</button>
+</form>
+
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse min-w-[760px]">
+      <thead>
+        <tr class="bg-slate-50 border-b border-slate-200">
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Customer ID</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Name</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Contact</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Added</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for customer in page_obj %}
+        <tr class="hover:bg-slate-50 transition-colors group">
+          <td class="py-3 px-4 text-sm text-slate-500">QST-{{ customer.id|stringformat:"03d" }}</td>
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">{{ customer.full_name|slice:":2"|upper }}</div>
+              <span class="text-sm font-semibold text-slate-800">{{ customer.full_name }}</span>
+            </div>
+          </td>
+          <td class="py-3 px-4">
+            <div class="flex flex-col">
+              <span class="text-sm text-slate-700">{{ customer.phone }}</span>
+              <span class="text-xs text-slate-400">{{ customer.email|default:"—" }}</span>
+            </div>
+          </td>
+          <td class="py-3 px-4 text-sm text-slate-500">{{ customer.created_at|date:"M j, Y" }}</td>
+          <td class="py-3 px-4 text-right">
+            <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <a href="{% url 'customer_detail' customer.pk %}" class="p-1.5 rounded text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition-colors" title="View">
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+              </a>
+              <a href="{% url 'customer_update' customer.pk %}" class="p-1.5 rounded text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition-colors" title="Edit">
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </a>
+              <a href="{% url 'customer_delete' customer.pk %}" class="p-1.5 rounded text-slate-500 hover:bg-slate-100 hover:text-rose-600 transition-colors" title="Delete">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="py-10 px-4 text-center text-sm text-slate-400">No customers found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <div class="bg-slate-50 border-t border-slate-200 p-3 flex items-center justify-between">
+    <span class="text-xs text-slate-400 ml-2">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} — {{ page_obj.paginator.count }} customer{{ page_obj.paginator.count|pluralize }}</span>
+    <div class="flex items-center gap-1">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}" class="p-1.5 rounded text-slate-500 hover:bg-slate-100"><span class="material-symbols-outlined text-[18px]">chevron_left</span></a>
+      {% endif %}
+      <span class="w-6 h-6 rounded flex items-center justify-center text-xs font-semibold bg-indigo-600 text-white">{{ page_obj.number }}</span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}" class="p-1.5 rounded text-slate-500 hover:bg-slate-100"><span class="material-symbols-outlined text-[18px]">chevron_right</span></a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

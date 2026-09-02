@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Installment Report - QIST Management{% endblock %}
+{% block content %}
+<nav class="flex text-xs text-slate-400 mb-2"><a href="{% url 'reports_home' %}" class="hover:text-indigo-600">Reports</a><span class="mx-1.5">›</span><span class="text-slate-600">Installment Report</span></nav>
+<h1 class="text-xl font-bold text-slate-900 mb-6">Installment Report</h1>
+
+<form method="get" class="bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap items-end gap-3 mb-5">
+  <div><label class="block text-xs font-medium text-slate-600 mb-1">Due from</label><input type="date" name="start" value="{{ start|date:'Y-m-d' }}" class="border border-slate-300 rounded-lg px-3 py-2 text-sm"></div>
+  <div><label class="block text-xs font-medium text-slate-600 mb-1">Due to</label><input type="date" name="end" value="{{ end|date:'Y-m-d' }}" class="border border-slate-300 rounded-lg px-3 py-2 text-sm"></div>
+  <div>
+    <label class="block text-xs font-medium text-slate-600 mb-1">Status</label>
+    <select name="status" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      <option value="">All</option>
+      {% for value, label in status_choices %}
+      <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700">Apply</button>
+</form>
+
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
+  <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-[11px] font-semibold text-slate-400 uppercase">Installments</p><p class="text-xl font-bold text-slate-900 mt-1">{{ totals.count|default:0 }}</p></div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-[11px] font-semibold text-slate-400 uppercase">Total Amount</p><p class="text-xl font-bold text-slate-900 mt-1">${{ totals.amount|default:0|floatformat:2 }}</p></div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4"><p class="text-[11px] font-semibold text-slate-400 uppercase">Late Fees</p><p class="text-xl font-bold text-rose-600 mt-1">${{ totals.late_fee|default:0|floatformat:2 }}</p></div>
+</div>
+
+{% if by_status %}
+<div class="flex flex-wrap gap-2 mb-5">
+  {% for row in by_status %}
+  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
+    {{ row.status|title }}: {{ row.count }} · ${{ row.amount|floatformat:2 }}
+  </span>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+  <table class="w-full text-left min-w-[700px]">
+    <thead><tr class="bg-slate-50 border-b border-slate-200">
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Plan</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Customer</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Due Date</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4 text-right">Amount</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Status</th>
+    </tr></thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for inst in installments %}
+      <tr class="hover:bg-slate-50">
+        <td class="py-2.5 px-4 text-sm font-medium text-indigo-600"><a href="{% url 'plan_detail' inst.plan_id %}">INS-{{ inst.plan_id|stringformat:"03d" }} #{{ inst.sequence }}</a></td>
+        <td class="py-2.5 px-4 text-sm font-semibold text-slate-800">{{ inst.plan.sale.customer.full_name }}</td>
+        <td class="py-2.5 px-4 text-sm text-slate-600">{{ inst.due_date|date:"M j, Y" }}</td>
+        <td class="py-2.5 px-4 text-sm font-semibold text-slate-800 text-right">${{ inst.amount }}</td>
+        <td class="py-2.5 px-4">
+          <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold
+            {% if inst.status == 'paid' %}bg-slate-100 text-slate-600
+            {% elif inst.status == 'overdue' %}bg-rose-50 text-rose-700
+            {% elif inst.status == 'due' %}bg-amber-50 text-amber-700
+            {% else %}bg-blue-50 text-blue-700{% endif %}">{{ inst.get_status_display }}</span>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="py-10 px-4 text-center text-sm text-slate-400">No installments due in this range.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

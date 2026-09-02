@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Sales - QIST Management{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-slate-900">Sales</h1>
+  <p class="text-sm text-slate-500 mt-0.5">Every sale, whether paid in full or on an installment plan.</p>
+</div>
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+  <table class="w-full text-left min-w-[700px]">
+    <thead><tr class="bg-slate-50 border-b border-slate-200">
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Sale</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Customer</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Description</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4 text-right">Total</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Plan</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Date</th>
+    </tr></thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for sale in page_obj %}
+      <tr class="hover:bg-slate-50">
+        <td class="py-3 px-4 text-sm font-medium text-indigo-600">{{ sale.invoice_number }}</td>
+        <td class="py-3 px-4 text-sm font-semibold text-slate-800">{{ sale.customer.full_name }}</td>
+        <td class="py-3 px-4 text-sm text-slate-500">{{ sale.description|truncatechars:35 }}</td>
+        <td class="py-3 px-4 text-sm text-slate-800 text-right">${{ sale.total }}</td>
+        <td class="py-3 px-4">
+          {% if sale.has_plan %}<a href="{% url 'plan_detail' sale.plan.pk %}" class="text-indigo-600 hover:underline text-sm">View plan</a>
+          {% elif sale.status == 'open' %}<a href="{% url 'plan_configure' sale.pk %}" class="text-indigo-600 hover:underline text-sm">Set up plan</a>
+          {% else %}<span class="text-slate-400 text-sm">—</span>{% endif %}
+        </td>
+        <td class="py-3 px-4 text-sm text-slate-500">{{ sale.created_at|date:"M j, Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="py-10 px-4 text-center text-sm text-slate-400">No sales yet. Start one from a customer's page.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

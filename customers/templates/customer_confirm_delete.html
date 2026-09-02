@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Delete Customer - QIST Management{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl border border-slate-200 p-6 max-w-lg">
+  <h1 class="text-lg font-bold text-slate-900 mb-1">Delete {{ customer.full_name }}?</h1>
+  <p class="text-sm text-slate-500 mb-5">This action can't be undone.</p>
+  <form method="post" class="flex items-center gap-2">
+    {% csrf_token %}
+    <button type="submit" class="bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-rose-700 transition-colors">Delete</button>
+    <a href="{% url 'customer_list' %}" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Create New Sale - QIST Management{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-2">
+  <div>
+    <h1 class="text-xl font-bold text-slate-900">Create New Sale</h1>
+    <p class="text-sm text-slate-500">Step 2 of 4: Add Products &amp; Services</p>
+  </div>
+  <a href="{% url 'customer_detail' customer.pk %}" class="text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center gap-1">
+    <span class="material-symbols-outlined text-[16px]">close</span> Cancel
+  </a>
+</div>
+
+<!-- Step indicator -->
+<div class="flex items-center gap-2 mb-6 mt-4">
+  <div class="flex flex-col items-center gap-1">
+    <div class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs"><span class="material-symbols-outlined text-[16px]">check</span></div>
+    <span class="text-[11px] text-slate-500">Customer</span>
+  </div>
+  <div class="flex-1 h-0.5 bg-indigo-600 -mt-4"></div>
+  <div class="flex flex-col items-center gap-1">
+    <div class="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">2</div>
+    <span class="text-[11px] text-indigo-700 font-semibold">Items</span>
+  </div>
+  <div class="flex-1 h-0.5 bg-slate-200 -mt-4"></div>
+  <div class="flex flex-col items-center gap-1">
+    <div class="w-7 h-7 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold">3</div>
+    <span class="text-[11px] text-slate-400">Summary</span>
+  </div>
+  <div class="flex-1 h-0.5 bg-slate-200 -mt-4"></div>
+  <div class="flex flex-col items-center gap-1">
+    <div class="w-7 h-7 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold">4</div>
+    <span class="text-[11px] text-slate-400">Payment</span>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="lg:col-span-2 flex flex-col gap-4">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <h3 class="text-sm font-semibold text-slate-900 mb-3">Add Products / Services</h3>
+      <form method="get" class="flex gap-2 mb-3">
+        <div class="relative flex-1">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+          <input type="text" name="q" value="{{ query }}" class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500" placeholder="Search product by name or SKU...">
+        </div>
+        <button type="submit" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50">Search</button>
+        <button type="button" onclick="document.getElementById('custom-item-form').classList.toggle('hidden')" class="px-3.5 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 flex items-center gap-1 whitespace-nowrap">
+          <span class="material-symbols-outlined text-[16px]">add</span> Add Custom
+        </button>
+      </form>
+
+      {% if query %}
+      <div class="border border-slate-200 rounded-lg divide-y divide-slate-100 mb-3">
+        {% for product in results %}
+        <form method="post" class="flex items-center justify-between px-3 py-2 hover:bg-slate-50">
+          {% csrf_token %}
+          <input type="hidden" name="form_action" value="add_product">
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <div>
+            <p class="text-sm font-medium text-slate-800">{{ product.name }}</p>
+            <p class="text-xs text-slate-400">${{ product.price }} {% if product.category %}· {{ product.category.name }}{% endif %}</p>
+          </div>
+          <button type="submit" class="text-xs font-semibold text-indigo-600 hover:underline">Add</button>
+        </form>
+        {% empty %}
+        <p class="text-sm text-slate-400 px-3 py-3">No products match "{{ query }}".</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div id="custom-item-form" class="hidden border border-slate-200 rounded-lg p-4 mb-3 bg-slate-50">
+        <form method="post" class="grid grid-cols-2 gap-3">
+          {% csrf_token %}
+          <input type="hidden" name="form_action" value="add_custom">
+          <div class="col-span-2">
+            <label class="text-xs font-medium text-slate-600">Description</label>
+            {{ custom_form.description }}
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-600">SKU (optional)</label>
+            {{ custom_form.sku }}
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-600">Unit Price</label>
+            {{ custom_form.unit_price }}
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-600">Quantity</label>
+            {{ custom_form.quantity }}
+          </div>
+          <div class="col-span-2">
+            <button type="submit" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-indigo-700">Add item</button>
+          </div>
+        </form>
+      </div>
+
+      <table class="w-full text-left">
+        <thead><tr class="border-b border-slate-200">
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-2">Item Details</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 w-20">Qty</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 text-right">Unit Price</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 text-right">Total</th>
+          <th class="w-8"></th>
+        </tr></thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for item in items %}
+          <tr>
+            <td class="py-3">
+              <p class="text-sm font-medium text-slate-800">{{ item.description }}</p>
+              {% if item.sku %}<p class="text-xs text-slate-400">SKU: {{ item.sku }}</p>{% endif %}
+            </td>
+            <td class="py-3">
+              <form method="post" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="form_action" value="update_qty">
+                <input type="hidden" name="index" value="{{ item.index }}">
+                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" onchange="this.form.submit()" class="w-16 px-2 py-1 border border-slate-300 rounded text-sm">
+              </form>
+            </td>
+            <td class="py-3 text-sm text-slate-700 text-right">${{ item.unit_price }}</td>
+            <td class="py-3 text-sm font-semibold text-indigo-700 text-right">${{ item.line_total }}</td>
+            <td class="py-3 text-right">
+              <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_action" value="remove_item">
+                <input type="hidden" name="index" value="{{ item.index }}">
+                <button type="submit" class="text-slate-400 hover:text-rose-600"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="py-8 text-center text-sm text-slate-400">No items added yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="flex justify-end pt-3 mt-2 border-t border-slate-100">
+        <p class="text-sm text-slate-500">Items subtotal: <span class="font-bold text-slate-900">${{ items_subtotal }}</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="lg:col-span-1">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <h3 class="text-sm font-semibold text-slate-900 mb-3">Selected Customer</h3>
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">{{ customer.full_name|slice:":2"|upper }}</div>
+        <div>
+          <p class="text-sm font-semibold text-slate-800">{{ customer.full_name }}</p>
+          <p class="text-xs text-slate-400">{{ customer.phone }}</p>
+        </div>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="form_action" value="continue">
+        <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5">
+          Continue to Summary <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

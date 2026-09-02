@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Record Payment - QIST Management{% endblock %}
+{% block content %}
+<nav class="flex text-xs text-slate-400 mb-4">
+  <a href="{% url 'plan_detail' installment.plan.pk %}" class="hover:text-indigo-600">Plan INS-{{ installment.plan.id|stringformat:"03d" }}</a>
+  <span class="mx-1.5">›</span><span class="text-slate-600">Record Payment</span>
+</nav>
+
+<div class="max-w-4xl bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+  <div class="w-full md:w-1/3 bg-slate-50 p-6 border-b md:border-b-0 md:border-r border-slate-200">
+    <h2 class="text-base font-bold text-slate-900 mb-5">Payment Details</h2>
+    <div class="space-y-4 text-sm">
+      <div>
+        <p class="text-[11px] font-semibold text-slate-400 uppercase mb-1">Customer</p>
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">{{ installment.plan.sale.customer.full_name|slice:":2"|upper }}</div>
+          <p class="font-semibold text-slate-800">{{ installment.plan.sale.customer.full_name }}</p>
+        </div>
+      </div>
+      <div class="h-px bg-slate-200"></div>
+      <div><p class="text-[11px] font-semibold text-slate-400 uppercase mb-1">Plan Reference</p><p class="text-slate-700">INS-{{ installment.plan.id|stringformat:"03d" }}</p></div>
+      <div><p class="text-[11px] font-semibold text-slate-400 uppercase mb-1">Installment</p><span class="inline-flex px-2 py-1 rounded bg-violet-50 text-violet-700 text-xs font-semibold">#{{ installment.sequence }} of {{ installment.plan.number_of_installments }}</span></div>
+      <div class="h-px bg-slate-200"></div>
+      <div><p class="text-[11px] font-semibold text-slate-400 uppercase mb-1">Amount Due</p><p class="text-2xl font-bold text-slate-900">${{ installment.amount_remaining }}</p></div>
+    </div>
+  </div>
+
+  <div class="w-full md:w-2/3 p-6">
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label class="block text-xs font-medium text-slate-600 mb-1.5" for="{{ form.amount.id_for_label }}">Payment Amount</label>{{ form.amount }}{% if form.amount.errors %}<span class="text-rose-600 text-xs">{{ form.amount.errors|striptags }}</span>{% endif %}</div>
+        <div><label class="block text-xs font-medium text-slate-600 mb-1.5" for="{{ form.method.id_for_label }}">Payment Method</label>{{ form.method }}</div>
+      </div>
+      <div><label class="block text-xs font-medium text-slate-600 mb-1.5" for="{{ form.reference.id_for_label }}">Reference Number</label>{{ form.reference }}</div>
+      <div><label class="block text-xs font-medium text-slate-600 mb-1.5" for="{{ form.notes.id_for_label }}">Notes (Optional)</label>{{ form.notes }}</div>
+      <div class="pt-3 flex justify-end gap-2">
+        <a href="{% url 'plan_detail' installment.plan.pk %}" class="px-4 py-2.5 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50">Cancel</a>
+        <button type="submit" class="px-4 py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">check_circle</span> Record Payment
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

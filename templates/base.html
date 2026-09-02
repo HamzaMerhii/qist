@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}QIST Management{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body class="h-full min-h-screen bg-slate-50 text-slate-900 flex font-normal">
+
+<!-- Sidebar -->
+<nav class="bg-white border-r border-slate-200 fixed left-0 top-0 h-screen w-60 flex flex-col py-5 hidden md:flex z-50">
+  <div class="px-5 mb-6 flex items-center gap-2.5">
+    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">Q</div>
+    <div>
+      <p class="text-base font-bold text-slate-900 leading-none">QIST ERP</p>
+      <p class="text-[11px] text-slate-400 mt-0.5">Installment Sales</p>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto overflow-x-hidden px-3 flex flex-col gap-0.5">
+    {% url 'admin_dashboard' as dashboard_url %}
+    <a href="{{ dashboard_url }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-indigo-50 text-indigo-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.resolver_match.url_name == 'admin_dashboard' %}text-indigo-600{% else %}text-slate-400{% endif %}">dashboard</span> Dashboard
+    </a>
+    {% url 'customer_list' as customers_url %}
+    <a href="{{ customers_url }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {% if 'customer' in request.resolver_match.url_name %}bg-indigo-50 text-indigo-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if 'customer' in request.resolver_match.url_name %}text-indigo-600{% else %}text-slate-400{% endif %}">groups</span> Customers
+    </a>
+    {% url 'category_list' as products_url %}
+    <a href="{{ products_url }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'category_list' %}bg-indigo-50 text-indigo-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.resolver_match.url_name == 'category_list' %}text-indigo-600{% else %}text-slate-400{% endif %}">inventory_2</span> Products
+    </a>
+    {% url 'sale_list' as sales_url %}
+    <a href="{{ sales_url }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'sale_list' %}bg-indigo-50 text-indigo-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.resolver_match.url_name == 'sale_list' %}text-indigo-600{% else %}text-slate-400{% endif %}">shopping_cart</span> Sales
+    </a>
+    {% url 'plan_list' as plans_url %}
+    <a href="{{ plans_url }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'plan_list' or request.resolver_match.url_name == 'plan_detail' or request.resolver_match.url_name == 'plan_configure' %}bg-indigo-50 text-indigo-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.resolver_match.url_name == 'plan_list' or request.resolver_match.url_name == 'plan_detail' or request.resolver_match.url_name == 'plan_configure' %}text-indigo-600{% else %}text-slate-400{% endif %}">calendar_month</span> Installments
+    </a>
+    {% url 'payment_list' as payments_url %}
+    <a href="{{ payments_url }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'payment_list' %}bg-indigo-50 text-indigo-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if request.resolver_match.url_name == 'payment_list' %}text-indigo-600{% else %}text-slate-400{% endif %}">payments</span> Payments
+    </a>
+    {% url 'reports_home' as reports_url %}
+    <a href="{{ reports_url }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {% if 'report' in request.resolver_match.url_name %}bg-indigo-50 text-indigo-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if 'report' in request.resolver_match.url_name %}text-indigo-600{% else %}text-slate-400{% endif %}">assessment</span> Reports
+    </a>
+    {% if request.user.profile.role == 'ADMIN' %}
+    {% url 'user_list' as users_url %}
+    <a href="{{ users_url }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {% if 'user' in request.resolver_match.url_name %}bg-indigo-50 text-indigo-700{% else %}text-slate-600 hover:bg-slate-50{% endif %}">
+      <span class="material-symbols-outlined text-[20px] {% if 'user' in request.resolver_match.url_name %}text-indigo-600{% else %}text-slate-400{% endif %}">manage_accounts</span> Users
+    </a>
+    {% endif %}
+
+    <!-- Not built yet — left as visible placeholders so the nav matches the full BRD scope -->
+    {% for label, icon in not_built_nav %}
+    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-300 cursor-not-allowed" title="Not built yet">
+      <span class="material-symbols-outlined text-[20px] text-slate-300">{{ icon }}</span> {{ label }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="mt-auto px-3 pt-3 border-t border-slate-100">
+    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+      <span class="material-symbols-outlined text-[20px] text-slate-400">help</span> Support
+    </a>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="w-full flex items-center justify-center gap-2 px-3 py-2 mt-1 rounded-lg border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors">
+        <span class="material-symbols-outlined text-[18px]">logout</span> Logout
+      </button>
+    </form>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="flex-1 flex flex-col md:ml-60 min-h-screen">
+  <header class="bg-white/90 backdrop-blur border-b border-slate-200 flex justify-between items-center px-6 h-16 sticky top-0 z-40">
+    <div class="md:hidden font-bold text-slate-900">QIST Management</div>
+    <div class="hidden md:flex items-center gap-1 text-sm">
+      <span class="font-semibold text-slate-900">QIST Management</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative hidden sm:block">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+        <input type="text" class="pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-sm w-56 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500" placeholder="Search everywhere...">
+      </div>
+      <button class="p-2 rounded-full hover:bg-slate-100 text-slate-500 relative">
+        <span class="material-symbols-outlined text-[20px]">notifications</span>
+        <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+      </button>
+      <button class="p-2 rounded-full hover:bg-slate-100 text-slate-500">
+        <span class="material-symbols-outlined text-[20px]">calendar_today</span>
+      </button>
+      <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+        {{ request.user.get_username|slice:":1"|upper }}
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 p-6 md:p-8 w-full">
+    {% if messages %}
+      <div class="flex flex-col gap-2 mb-4">
+        {% for message in messages %}
+          <div class="rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-sm px-4 py-2.5">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

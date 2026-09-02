@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Overview of your business activity</p>
+  </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <div class="flex items-center gap-2 text-indigo-600 mb-2"><span class="material-symbols-outlined text-[18px]">trending_up</span></div>
+    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Total Sales</p>
+    <p class="text-xl font-bold text-slate-900 mt-1">${{ total_sales|floatformat:2 }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <div class="flex items-center gap-2 text-indigo-600 mb-2"><span class="material-symbols-outlined text-[18px]">account_balance_wallet</span></div>
+    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Total Collected</p>
+    <p class="text-xl font-bold text-slate-900 mt-1">${{ total_collected|floatformat:2 }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <div class="flex items-center gap-2 text-indigo-600 mb-2"><span class="material-symbols-outlined text-[18px]">account_balance</span></div>
+    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Outstanding Balance</p>
+    <p class="text-xl font-bold text-slate-900 mt-1">${{ outstanding_balance|floatformat:2 }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <div class="flex items-center gap-2 text-rose-600 mb-2"><span class="material-symbols-outlined text-[18px]">warning</span></div>
+    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Overdue Amount</p>
+    <p class="text-xl font-bold text-rose-600 mt-1">${{ overdue_amount|floatformat:2 }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <div class="flex items-center gap-2 text-indigo-600 mb-2"><span class="material-symbols-outlined text-[18px]">assignment</span></div>
+    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Active Plans</p>
+    <p class="text-xl font-bold text-slate-900 mt-1">{{ active_plans }}</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
+  <!-- Sales Overview chart -->
+  <div class="xl:col-span-2 bg-white rounded-xl border border-slate-200 p-5">
+    <h3 class="text-base font-semibold text-slate-900 mb-4">Sales Overview</h3>
+    {% if chart_points %}
+    <div class="relative w-full h-56">
+      <svg viewBox="0 0 600 200" class="w-full h-full overflow-visible" preserveAspectRatio="none">
+        <polyline
+          fill="none" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+          points="{{ chart_svg_points }}"
+        />
+      </svg>
+      <div class="flex justify-between text-[11px] text-slate-400 mt-2 px-1">
+        {% for pt in chart_points %}<span>{{ pt.label }}</span>{% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <p class="text-sm text-slate-400 text-center py-12">Not enough sales data yet to chart.</p>
+    {% endif %}
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="bg-white rounded-xl border border-slate-200 p-5">
+    <h3 class="text-base font-semibold text-slate-900 mb-4">Recent Activity</h3>
+    <ul class="space-y-4">
+      {% for payment in recent_payments %}
+      <li class="flex gap-3">
+        <span class="w-2 h-2 mt-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+        <div>
+          <p class="text-sm text-slate-700"><span class="font-semibold">Payment received</span> from {{ payment.installment.plan.sale.customer.full_name }}</p>
+          <p class="text-xs text-slate-400 mt-0.5">{{ payment.paid_at|timesince }} ago</p>
+        </div>
+      </li>
+      {% endfor %}
+      {% for sale in recent_sales %}
+      <li class="flex gap-3">
+        <span class="w-2 h-2 mt-1.5 rounded-full bg-indigo-500 flex-shrink-0"></span>
+        <div>
+          <p class="text-sm text-slate-700"><span class="font-semibold">New sale</span> for {{ sale.customer.full_name }}</p>
+          <p class="text-xs text-slate-400 mt-0.5">{{ sale.created_at|timesince }} ago</p>
+        </div>
+      </li>
+      {% endfor %}
+      {% if not recent_payments and not recent_sales %}
+      <li class="text-sm text-slate-400">No activity yet.</li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div class="p-4 border-b border-slate-100 flex items-center gap-2">
+      <span class="material-symbols-outlined text-indigo-600 text-[18px]">calendar_month</span>
+      <h3 class="text-sm font-semibold text-slate-900">Upcoming Payments</h3>
+    </div>
+    <table class="w-full text-left">
+      <thead><tr class="border-b border-slate-100">
+        <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4">Customer</th>
+        <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4">Due Date</th>
+        <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4 text-right">Amount</th>
+      </tr></thead>
+      <tbody>
+        {% for inst in upcoming_installments %}
+        <tr class="border-b border-slate-50 hover:bg-slate-50">
+          <td class="py-2.5 px-4 text-sm font-medium text-slate-800">{{ inst.plan.sale.customer.full_name }}</td>
+          <td class="py-2.5 px-4 text-sm text-slate-500">{{ inst.due_date|date:"M j, Y" }}</td>
+          <td class="py-2.5 px-4 text-sm font-semibold text-slate-800 text-right">${{ inst.amount_remaining }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="py-6 px-4 text-center text-sm text-slate-400">Nothing due soon.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div class="p-4 border-b border-slate-100 flex items-center gap-2">
+      <span class="material-symbols-outlined text-rose-600 text-[18px]">warning</span>
+      <h3 class="text-sm font-semibold text-slate-900">Overdue Payments</h3>
+    </div>
+    <table class="w-full text-left">
+      <thead><tr class="border-b border-slate-100">
+        <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4">Customer</th>
+        <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4">Status</th>
+        <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4 text-right">Total</th>
+      </tr></thead>
+      <tbody>
+        {% for inst in overdue_installments %}
+        <tr class="border-b border-slate-50 hover:bg-slate-50">
+          <td class="py-2.5 px-4 text-sm font-medium text-slate-800">{{ inst.plan.sale.customer.full_name }}</td>
+          <td class="py-2.5 px-4"><span class="inline-flex px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[11px] font-semibold">{{ inst.due_date|timesince }} overdue</span></td>
+          <td class="py-2.5 px-4 text-sm font-semibold text-rose-600 text-right">${{ inst.amount_remaining }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="py-6 px-4 text-center text-sm text-slate-400">Nothing overdue.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

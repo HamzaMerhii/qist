@@ -1,0 +1,62 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Environment Variables & Secret Files
+.env
+.env.local
+.env.*.local
+db.sqlite3
+db.sqlite3-journal
+
+# Django Media & Static Files
+/staticfiles/
+/media/
+
+# Log files
+*.log
+
+# IDE & Code Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing & Coverage reports
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/

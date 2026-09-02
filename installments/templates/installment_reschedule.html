@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Reschedule Installment - QIST Management{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-xl font-bold text-slate-900">Reschedule Installment #{{ installment.sequence }}</h1>
+  <p class="text-sm text-slate-500 mt-0.5">Plan INS-{{ installment.plan.id|stringformat:"03d" }} — {{ installment.plan.sale.customer.full_name }}</p>
+</div>
+<div class="bg-white rounded-xl border border-slate-200 p-6 max-w-lg">
+  <p class="text-sm text-slate-500 mb-4">Current due date: <span class="text-slate-800 font-semibold">{{ installment.due_date|date:"M j, Y" }}</span></p>
+  <form method="post" class="flex flex-col gap-4">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium text-slate-700" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<span class="text-rose-600 text-xs">{{ field.errors|striptags }}</span>{% endif %}
+      </div>
+    {% endfor %}
+    <div class="flex items-center gap-2 mt-2">
+      <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700">Save New Date</button>
+      <a href="{% url 'plan_detail' installment.plan.pk %}" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

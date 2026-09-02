@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Outstanding Balance Report - QIST Management{% endblock %}
+{% block content %}
+<nav class="flex text-xs text-slate-400 mb-2"><a href="{% url 'reports_home' %}" class="hover:text-indigo-600">Reports</a><span class="mx-1.5">›</span><span class="text-slate-600">Outstanding Balance Report</span></nav>
+<h1 class="text-xl font-bold text-slate-900 mb-1">Outstanding Balance Report</h1>
+<p class="text-sm text-slate-500 mb-6">Remaining balance owed per customer, across active installment plans.</p>
+
+<div class="bg-white rounded-xl border border-slate-200 p-5 mb-5 max-w-xs">
+  <p class="text-[11px] font-semibold text-slate-400 uppercase">Total Outstanding</p>
+  <p class="text-2xl font-bold text-amber-600 mt-1">${{ grand_total|floatformat:2 }}</p>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+  <table class="w-full text-left min-w-[700px]">
+    <thead><tr class="bg-slate-50 border-b border-slate-200">
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Customer</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4">Plan</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4 text-right">Financed</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4 text-right">Paid</th>
+      <th class="text-[11px] font-semibold text-slate-400 uppercase py-3 px-4 text-right">Remaining</th>
+    </tr></thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for row in rows %}
+      <tr class="hover:bg-slate-50">
+        <td class="py-2.5 px-4 text-sm font-semibold text-slate-800"><a href="{% url 'customer_detail' row.customer.pk %}" class="hover:text-indigo-600">{{ row.customer.full_name }}</a></td>
+        <td class="py-2.5 px-4 text-sm text-slate-600"><a href="{% url 'plan_detail' row.plan.pk %}" class="text-indigo-600 hover:underline">INS-{{ row.plan.id|stringformat:"03d" }}</a></td>
+        <td class="py-2.5 px-4 text-sm text-slate-600 text-right">${{ row.total_financed }}</td>
+        <td class="py-2.5 px-4 text-sm text-slate-600 text-right">${{ row.total_paid }}</td>
+        <td class="py-2.5 px-4 text-sm font-bold text-amber-600 text-right">${{ row.remaining }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="py-10 px-4 text-center text-sm text-slate-400">No outstanding balances — every active plan is fully paid.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

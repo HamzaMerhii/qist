@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Edit Role - QIST Management{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-slate-900">Edit Role</h1>
+  <p class="text-sm text-slate-500 mt-0.5">{{ profile.user.username }}</p>
+</div>
+<div class="bg-white rounded-xl border border-slate-200 p-6 max-w-md">
+  <form method="post" class="flex flex-col gap-4">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium text-slate-700" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+      </div>
+    {% endfor %}
+    <div class="flex items-center gap-2 mt-2">
+      <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors">Save</button>
+      <a href="{% url 'user_list' %}" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Receipt {{ payment.receipt_number }} - QIST Management{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white rounded-xl border border-slate-200 p-8">
+  <div class="flex justify-between items-start mb-6 pb-5 border-b border-slate-100">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">Q</div>
+      <div><p class="font-bold text-slate-900">QIST ERP</p><p class="text-xs text-slate-400">Installment Sales Management</p></div>
+    </div>
+    <div class="text-right">
+      <p class="font-bold text-slate-300 uppercase tracking-widest text-sm">Receipt</p>
+      <p class="text-xs text-slate-500 mt-1">No: {{ payment.receipt_number }}</p>
+      <p class="text-xs text-slate-500">Date: {{ payment.paid_at|date:"M d, Y" }}</p>
+    </div>
+  </div>
+
+  <div class="bg-indigo-50 flex flex-col md:flex-row justify-between items-center p-5 rounded-xl mb-6 border border-indigo-100">
+    <div><p class="text-xs font-semibold text-indigo-400 uppercase mb-1">Amount Received</p><p class="text-3xl font-bold text-indigo-700">${{ payment.amount }}</p></div>
+    <div class="mt-2 md:mt-0 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 text-xs font-semibold">
+      <span class="material-symbols-outlined text-[14px]">verified</span> Payment Successful
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-y-4 gap-x-4 mb-6 text-sm">
+    <div><p class="text-[11px] font-semibold text-slate-400 uppercase mb-1">Received From</p><p class="text-slate-800">{{ payment.installment.plan.sale.customer.full_name }}</p></div>
+    <div><p class="text-[11px] font-semibold text-slate-400 uppercase mb-1">Applied To</p><p class="text-slate-800">INS-{{ payment.installment.plan.id|stringformat:"03d" }} <span class="text-slate-400">(#{{ payment.installment.sequence }})</span></p></div>
+    <div><p class="text-[11px] font-semibold text-slate-400 uppercase mb-1">Payment Method</p><p class="text-slate-800 capitalize">{{ payment.get_method_display }}</p></div>
+    <div><p class="text-[11px] font-semibold text-slate-400 uppercase mb-1">Reference No.</p><p class="text-slate-800">{{ payment.reference|default:"—" }}</p></div>
+  </div>
+
+  <div class="border-t border-dashed border-slate-200 pt-4 mb-6 flex justify-between items-center">
+    <span class="text-sm text-slate-500">Remaining Balance on Installment:</span>
+    <span class="text-lg font-bold text-slate-900">${{ payment.installment.amount_remaining }}</span>
+  </div>
+
+  <div class="flex justify-center gap-3">
+    <a href="{% url 'plan_detail' payment.installment.plan.pk %}" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">arrow_back</span> Back to Plan
+    </a>
+    <button onclick="window.print()" class="px-4 py-2 rounded-lg border border-indigo-300 text-indigo-700 text-sm font-medium hover:bg-indigo-50 flex items-center gap-1.5" type="button">
+      <span class="material-symbols-outlined text-[16px]">print</span> Print Receipt
+    </button>
+  </div>
+</div>
+{% endblock %}

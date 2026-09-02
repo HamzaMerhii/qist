@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.db import transaction
 
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Sum
 from sales.models import Sale
 from .models import InstallmentPlan, InstallmentPayment
 from .forms import InstallmentPlanForm
@@ -156,3 +156,87 @@ def record_payment(request, payment_id):
         messages.success(request, f"Payment #{payment.installment_number} recorded successfully.")
 
     return redirect("installments:plan_detail", pk=payment.plan.pk)
+
+
+
+@login_required
+def payment_ledger(request):
+    """
+    Displays all installment plans with Total Amount, Down Payment, 
+    Collected Installments, Total Paid, and Remaining Balance.
+    """
+    query = request.GET.get("q", "").strip()
+
+    plans = InstallmentPlan.objects.select_related(
+        "sale__customer"
+    ).annotate(
+        installments_paid=Sum(
+            "payments__amount_due",
+            filter=Q(payments__status="PAID")
+        )
+    ).order_by("-created_at")
+
+    if query:
+        plans = plans.filter(
+            Q(sale__customer__first_name__icontains=query) |
+            Q(sale__customer__last_name__icontains=query) |
+            Q(id__icontains=query)
+        )
+
+    plan_data = []
+    for plan in plans:
+        down_payment = plan.down_payment or 0
+        collected_installments = plan.installments_paid or 0
+        total_paid = down_payment + collected_installments
+        remaining_balance = plan.total_amount - total_paid
+
+        plan_data.append({
+            "plan": plan,
+            "down_payment": down_payment,
+            "collected_installments": collected_installments,
+            "total_paid": total_paid,
+            "remaining_balance": max(remaining_balance, 0),
+        })
+
+    return render(
+        request, 
+        "payment_ledger.html", 
+        {"plan_data": plan_data, "query": query}
+    )
+@login_required
+def overdue_payments(request):
+    """Dedicated queue for overdue installment payments."""
+    today = date.today()
+    overdue_list = InstallmentPayment.objects.filter(
+        status="PENDING",
+        due_date__lt=today
+    ).select_related("plan__sale__customer").order_by("due_date")
+
+    return render(
+        request, 
+        "overdue_payments.html", 
+        {"overdue_list": overdue_list, "today": today}
+    )
+
+
+@login_required
+def mark_payment_paid(request, payment_id):
+    """Action view to mark an installment payment as PAID."""
+    payment = get_object_or_404(InstallmentPayment, pk=payment_id)
+    
+    if request.method == "POST":
+        payment.status = "PAID"
+        payment.paid_date = date.today()
+        payment.save()
+        
+        # Check if all payments in the plan are complete
+        plan = payment.plan
+        if not plan.payments.filter(status="PENDING").exists():
+            plan.status = "COMPLETED"
+            plan.save()
+            
+        messages.success(request, f"Payment #{payment.installment_number} marked as PAID.")
+    
+    # Redirect back to referring page or ledger
+    next_url = request.POST.get("next", "installments:payment_ledger")
+    return redirect(next_url)

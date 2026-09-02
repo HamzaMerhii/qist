@@ -1,0 +1,68 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }} | QIST</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <div class="dashboard-shell">
+        <aside class="dashboard-sidebar">
+            <a class="brand" href="/">QIST</a>
+
+            <nav aria-label="Main navigation">
+                {% if current_role == "ADMIN" %}
+                    <a class="active" href="{% url 'admin_dashboard' %}">Overview</a>
+                {% else %}
+                    <a class="active" href="{% url 'sales_dashboard' %}">Overview</a>
+                {% endif %}
+
+                <a href="{% url 'sales:sale_list' %}">Sales</a>
+                <a href="{% url 'customers:customer_list' %}">Customers</a>
+                <a href="{% url 'product_list' %}">Products</a>
+                <a href="{% url 'category_list' %}">Categories</a>
+                <a href="{% url 'installments:plan_list' %}">Installments</a>
+
+                {% if current_role != "CASHIER" %}
+                    <a href="{% url 'sales:sale_return_list' %}">Returns</a>
+                {% endif %}
+
+                {% if current_role == "ADMIN" %}
+                    <a href="{% url 'users:user_list' %}">Staff users</a>
+                    <a href="{% url 'admin:index' %}">Django admin</a>
+                {% endif %}
+            </nav>
+
+            <div class="sidebar-user">
+                <strong>{{ request.user.username }}</strong>
+                <span>{{ current_role|title }}</span>
+                <a href="{% url 'users:logout' %}">Sign out</a>
+            </div>
+        </aside>
+
+        <main class="dashboard-main">
+            <header class="dashboard-header">
+                <div>
+                    <p class="eyebrow">{{ today|date:"l, F j, Y" }}</p>
+                    <h1>{{ page_title }}</h1>
+                </div>
+                <div class="quick-actions">
+                    {% block quick_actions %}{% endblock %}
+                </div>
+            </header>
+
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block dashboard_content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

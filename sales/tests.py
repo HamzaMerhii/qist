@@ -87,20 +87,20 @@ class SaleViewTest(TestCase):
 
     def test_sale_detail_view(self):
         self.client.force_login(self.user)
-        response = self.client.get(reverse("sale_detail", args=[self.sale.pk]))
+        response = self.client.get(reverse("sales:sale_detail", args=[self.sale.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "View Customer")
 
     def test_sale_items_view(self):
         self.client.force_login(self.user)
-        response = self.client.get(reverse("sale_items", args=[self.sale.pk]))
+        response = self.client.get(reverse("sales:sale_items", args=[self.sale.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "View Product")
 
     def test_sale_return_view(self):
         self.client.force_login(self.user)
         response = self.client.post(
-            reverse("sale_return", args=[self.sale.pk]),
+            reverse("sales:sale_return", args=[self.sale.pk]),
             {
                 "reason": "Damaged item",
                 f"quantity_{self.sale_item.pk}": "1",

@@ -1,14 +1,22 @@
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
 
-@login_required
+from accounts.models import UserProfile
+from accounts.permissions import role_required
+
+from .services import (
+    get_admin_dashboard_context,
+    get_cashier_dashboard_context,
+)
+
+
+@role_required(UserProfile.Role.ADMIN)
 def admin_dashboard(request):
-    return render(request, "admin.html")
+    return render(request, "admin.html", get_admin_dashboard_context())
 
-@login_required
-def manager_dashboard(request):
-    return render(request, "manager.html")
 
-@login_required
+@role_required(
+    UserProfile.Role.ADMIN,
+    UserProfile.Role.CASHIER,
+)
 def sales_dashboard(request):
-    return render(request, "sales.html")
+    return render(request, "sales.html", get_cashier_dashboard_context())

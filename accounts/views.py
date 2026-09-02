@@ -28,12 +28,11 @@ def login_view(request):
     else:
         form = AuthenticationForm()
 
-    # Change "users/login.html" to "login.html"
     return render(request, "login.html", {"form": form})
 
 def logout_view(request):
     logout(request)
-    return redirect("login")
+    return redirect("users:login")
 
 
 def admin_required(user):

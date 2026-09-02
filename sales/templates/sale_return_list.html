@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sales Returns Directory</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #0f172a; padding: 2rem; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .card { background: white; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
+        .search-bar { padding: 1rem; border-bottom: 1px solid #e2e8f0; background: #fafafa; }
+        .search-input { padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 4px; width: 300px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+        th { background: #f8fafc; padding: 0.75rem 1rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 0.875rem 1rem; border-bottom: 1px solid #e2e8f0; }
+        .btn { padding: 0.375rem 0.75rem; border-radius: 4px; text-decoration: none; font-size: 0.8125rem; font-weight: 600; display: inline-block; }
+        .btn-info { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #334155; }
+        .badge { background: #fee2e2; color: #991b1b; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Sales Returns</h1>
+        <a href="{% url 'sales:sale_list' %}" class="btn btn-outline">&larr; Back to Sales</a>
+    </div>
+
+    <div class="card">
+        <div class="search-bar">
+            <form method="get" action="{% url 'sales:sale_return_list' %}">
+                <input type="text" name="search" class="search-input" placeholder="Search by customer or sale ID..." value="{{ search_query }}">
+                <button type="submit" class="btn btn-outline">Search</button>
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Return ID</th>
+                    <th>Original Sale</th>
+                    <th>Customer</th>
+                    <th>Refund Amount</th>
+                    <th>Reason</th>
+                    <th>Date</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ret in page_obj %}
+                <tr>
+                    <td><strong>#RET-{{ ret.id }}</strong></td>
+                    <td><a href="{% url 'sales:sale_detail' ret.sale.pk %}">#{{ ret.sale.id }}</a></td>
+                    <td>{{ ret.sale.customer.full_name }}</td>
+                    <td><span class="badge">${{ ret.refund_amount }}</span></td>
+                    <td>{{ ret.reason|truncatechars:30 }}</td>
+                    <td>{{ ret.created_at|date:"M d, Y - H:i" }}</td>
+                    <td style="text-align: right;">
+                        <a href="{% url 'sales:sale_return_detail' ret.pk %}" class="btn btn-info">View Details</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #64748b; padding: 2rem;">No sales returns recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

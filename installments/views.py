@@ -1,16 +1,17 @@
+import calendar
 from decimal import Decimal
-from datetime import timedelta
-from django.utils import timezone
-from django.shortcuts import render, get_object_or_404, redirect
+from datetime import date
+from dateutil.relativedelta import relativedelta
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db.models import Q
+from django.contrib import messages
 from django.db import transaction
 
-from .models import InstallmentPlan, Installment
-from .forms import InstallmentPlanForm
+from django.core.paginator import Paginator
+from django.db.models import Q
 from sales.models import Sale
-
+from .models import InstallmentPlan, InstallmentPayment
+from .forms import InstallmentPlanForm
 
 @login_required
 def plan_list(request):
@@ -33,18 +34,13 @@ def plan_list(request):
         {"page_obj": page_obj, "search_query": search_query},
     )
 
-
-@login_required
-def plan_detail(request, pk):
-    plan = get_object_or_404(
-        InstallmentPlan.objects.select_related("sale__customer"), pk=pk
-    )
-    installments = plan.installments.all()
-    return render(
-        request,
-        "plan_detail.html",
-        {"plan": plan, "installments": installments},
-    )
+def add_months(sourcedate, months):
+    """Utility to add N months safely using standard library calendar."""
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month // 12
+    month = month % 12 + 1
+    day = min(sourcedate.day, calendar.monthrange(year, month)[1])
+    return date(year, month, day)
 
 
 @login_required
@@ -52,39 +48,111 @@ def plan_detail(request, pk):
 def create_plan_for_sale(request, sale_id):
     sale = get_object_or_404(Sale, pk=sale_id)
 
+    if sale.total_amount <= Decimal("0.00"):
+        messages.error(request, "Cannot create an installment plan for a sale with $0 total.")
+        return redirect("sales:sale_detail", pk=sale.pk)
+
+    existing_plan = getattr(sale, "installment_plan", None)
+    if existing_plan:
+        return redirect("installments:plan_detail", pk=existing_plan.pk)
+
     if request.method == "POST":
         form = InstallmentPlanForm(request.POST)
         if form.is_valid():
             plan = form.save(commit=False)
             plan.sale = sale
+            plan.total_amount = sale.total_amount
+            
+            # Guarantee number_of_months is at least 1
+            months = max(1, plan.number_of_months or 1)
+            plan.number_of_months = months
 
-            # Calculate balances
-            remaining = sale.total_amount - plan.down_payment
-            plan.remaining_balance = remaining
-            plan.save()
+            down_payment = plan.down_payment or Decimal("0.00")
+            remaining_balance = plan.total_amount - down_payment
+            
+            if remaining_balance <= Decimal("0.00"):
+                messages.error(request, "Down payment cannot exceed or equal the total sale amount.")
+                return render(request, "plan_form.html", {"form": form, "sale": sale})
 
-            # Schedule Calculation
-            per_installment = (remaining / plan.total_installments).quantize(Decimal("0.01"))
-            current_date = timezone.now().date()
+            plan.remaining_balance = remaining_balance
+            plan.status = "ACTIVE"
+            plan.save()  # MUST SAVE BEFORE CREATING PAYMENTS FOR FOREIGNKEY RELATIONS
 
-            days_step = 30
-            for i in range(1, plan.total_installments + 1):
-                current_date = current_date + timedelta(days=days_step)
-                Installment.objects.create(
-                    plan=plan,
-                    sequence_number=i,
-                    amount_due=per_installment,
-                    due_date=current_date,
-                    original_due_date=current_date,
-                    status="PENDING",
+            # Calculate installments
+            monthly_amount = round(remaining_balance / Decimal(str(months)), 2)
+            start_date = plan.start_date or date.today()
+
+            payments_to_create = []
+            for i in range(1, months + 1):
+                due_date = add_months(start_date, i)
+                
+                if i == months:
+                    current_monthly = remaining_balance - (monthly_amount * Decimal(str(months - 1)))
+                else:
+                    current_monthly = monthly_amount
+
+                payments_to_create.append(
+                    InstallmentPayment(
+                        plan=plan,
+                        installment_number=i,
+                        amount_due=current_monthly,
+                        due_date=due_date,
+                        status="PENDING",
+                    )
                 )
 
+            # Bulk insert payments directly into database
+            InstallmentPayment.objects.bulk_create(payments_to_create)
+
+            messages.success(request, f"Installment plan created with {months} monthly payments.")
             return redirect("installments:plan_detail", pk=plan.pk)
     else:
-        form = InstallmentPlanForm(initial={"down_payment": Decimal("0.00")})
+        form = InstallmentPlanForm(initial={"total_amount": sale.total_amount})
 
     return render(
         request,
         "plan_form.html",
         {"form": form, "sale": sale},
     )
+
+
+@login_required
+def plan_detail(request, pk):
+    plan = get_object_or_404(
+        InstallmentPlan.objects.select_related("sale", "sale__customer"), 
+        pk=pk
+    )
+    payments = plan.payments.all().order_by("installment_number")
+
+    return render(
+        request,
+        "plan_detail.html",
+        {"plan": plan, "payments": payments},
+    )
+
+
+@login_required
+@transaction.atomic
+def record_payment(request, payment_id):
+    payment = get_object_or_404(
+        InstallmentPayment.objects.select_related("plan"), 
+        pk=payment_id
+    )
+
+    if payment.status != "PAID":
+        payment.status = "PAID"
+        payment.paid_date = date.today()
+        payment.save()
+
+        # Update remaining balance on plan
+        plan = payment.plan
+        plan.remaining_balance = max(Decimal("0.00"), plan.remaining_balance - payment.amount_due)
+        
+        # Check if entire plan is settled
+        if not plan.payments.filter(status="PENDING").exists():
+            plan.status = "COMPLETED"
+        
+        plan.save()
+        messages.success(request, f"Payment #{payment.installment_number} recorded successfully.")
+
+    return redirect("installments:plan_detail", pk=payment.plan.pk)

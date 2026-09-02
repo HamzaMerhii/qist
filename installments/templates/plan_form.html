@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Installment Plan</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #0f172a; padding: 2rem; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .card { background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.375rem; }
+        input { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; }
+        .btn { padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-size: 0.875rem; font-weight: 600; cursor: pointer; border: none; display: inline-block; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #334155; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="margin-bottom: 1rem;">
+        <a href="{% url 'sales:sale_detail' sale.pk %}" class="btn btn-outline">&larr; Back to Sale #{{ sale.id }}</a>
+    </div>
+
+    <div class="card">
+        <h2>Setup Installment Plan</h2>
+        <p><strong>Customer:</strong> {{ sale.customer.full_name }}</p>
+        <p><strong>Sale Total:</strong> ${{ sale.total_amount }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_number_of_months">Duration (Months):</label>
+                {{ form.number_of_months }}
+            </div>
+            <div class="form-group">
+                <label for="id_down_payment">Down Payment ($):</label>
+                {{ form.down_payment }}
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Generate Schedule</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

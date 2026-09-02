@@ -14,4 +14,5 @@ urlpatterns = [
     path("<int:pk>/return/", views.sale_return, name="sale_return"),
     path("returns/", views.sale_return_list, name="sale_return_list"),
     path("returns/<int:pk>/", views.sale_return_detail, name="sale_return_detail"),
+    path("<int:sale_id>/receipt/", views.printable_sale_receipt, name="sale_receipt"),
 ]

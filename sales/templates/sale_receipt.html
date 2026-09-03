@@ -1,76 +1,419 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Receipt #{{ sale.id }} - Qist ERP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background-color: #fff !important; }
-            .receipt-card { border: none !important; shadow: none !important; }
-        }
-        .receipt-card { max-width: 500px; margin: 0 auto; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sale Receipt | QIST ERP</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/payments_support.css' %}"
+    >
 </head>
-<body class="bg-light py-4">
 
-<div class="container">
-    <div class="text-center mb-3 no-print">
-        <button onclick="window.print()" class="btn btn-primary btn-sm me-2">Print Receipt</button>
-        <a href="{% url 'sales:sale_list' %}" class="btn btn-outline-secondary btn-sm">&larr; Back to Sales</a>
-    </div>
+<body>
 
-    <div class="card receipt-card shadow-sm border-0 p-4">
-        <div class="text-center mb-3">
-            <h4 class="fw-bold mb-0">QIST ERP STORE</h4>
-            <p class="text-muted small mb-0">Official Sales Receipt</p>
-            <hr>
-        </div>
+<div class="app-layout">
 
-        <div class="row small mb-3">
-            <div class="col-6">
-                <strong>Receipt #:</strong> SALE-{{ sale.id }}<br>
-                <strong>Date:</strong> {{ sale.created_at|date:"Y-m-d H:i" }}
-            </div>
-            <div class="col-6 text-end">
-                <strong>Customer:</strong> {{ sale.customer.full_name|default:"Guest Customer" }}<br>
-                <strong>Payment:</strong> {{ sale.payment_type }}
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <div class="logo">
+                QIST <span>ERP</span>
             </div>
         </div>
 
-        <table class="table table-sm mb-3 align-middle small">
-            <thead>
-                <tr>
-                    <th>Item</th>
-                    <th class="text-center">Qty</th>
-                    <th class="text-end">Price</th>
-                    <th class="text-end">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in sale.items.all %}
-                <tr>
-                    <td>{{ item.product.name }}</td>
-                    <td class="text-center">{{ item.quantity }}</td>
-                    <td class="text-end">${{ item.unit_price }}</td>
-                    <td class="text-end">${{ item.total_price }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <nav class="sidebar-menu">
 
-        <div class="border-top pt-2 mb-3">
-            <div class="d-flex justify-content-between fw-bold">
-                <span>Total Amount:</span>
-                <span>${{ sale.total_amount }}</span>
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">dashboard</span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">group</span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}">
+                <span class="material-symbols-outlined menu-icon">inventory_2</span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="material-symbols-outlined menu-icon">category</span>
+                Categories
+            </a>
+
+            <a
+                href="{% url 'sales:sale_list' %}"
+                class="active"
+            >
+                <span class="material-symbols-outlined menu-icon">shopping_cart</span>
+                Sales
+            </a>
+
+            <a href="{% url 'installments:plan_list' %}">
+                <span class="material-symbols-outlined menu-icon">calendar_month</span>
+                Installment Plans
+            </a>
+
+            <a href="{% url 'installments:payment_ledger' %}">
+                <span class="material-symbols-outlined menu-icon">payments</span>
+                Payments
+            </a>
+
+            <a href="{% url 'installments:overdue_payments' %}">
+                <span class="material-symbols-outlined menu-icon">schedule</span>
+                Overdue Payments
+            </a>
+
+            <a href="{% url 'sales:sale_return_list' %}">
+                <span class="material-symbols-outlined menu-icon">assignment_return</span>
+                Returns & Refunds
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">analytics</span>
+                Reports
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="topbar-title">
+                    Sale Receipt
+                </div>
+
+                <div class="topbar-subtitle">
+                    Printable sale transaction receipt
+                </div>
             </div>
-        </div>
 
-        <div class="text-center text-muted small mt-4">
-            <p class="mb-0">Thank you for your business!</p>
-        </div>
-    </div>
+            <div class="user-info">
+
+                <div class="avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
+                <div>
+                    <div class="topbar-title">
+                        {{ request.user.username }}
+                    </div>
+
+                    <div class="topbar-subtitle">
+                        Administrator
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            <div class="receipt-page">
+
+                <div class="receipt-actions">
+
+                    <a
+                        href="{% url 'sales:sale_detail' sale.pk %}"
+                        class="secondary-btn"
+                    >
+                        <span class="material-symbols-outlined">
+                            arrow_back
+                        </span>
+
+                        Back to Sale
+                    </a>
+
+
+                    <div class="receipt-action-right">
+
+                        <button
+                            type="button"
+                            class="primary-btn"
+                            onclick="window.print()"
+                        >
+                            <span class="material-symbols-outlined">
+                                print
+                            </span>
+
+                            Print Receipt
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="receipt-card">
+
+                    <div class="receipt-line"></div>
+
+
+                    <div class="receipt-body">
+
+                        <div class="receipt-header">
+
+                            <div class="receipt-brand">
+
+                                <div class="receipt-logo">
+                                    Q
+                                </div>
+
+                                <div>
+                                    <h2>QIST ERP</h2>
+
+                                    <p>
+                                        Installment Sales Management
+                                    </p>
+                                </div>
+
+                            </div>
+
+
+                            <div class="receipt-title">
+
+                                <h2>Sale Receipt</h2>
+
+                                <p>
+                                    <strong>Sale No:</strong>
+                                    #{{ sale.pk }}
+                                </p>
+
+                                <p>
+                                    <strong>Date:</strong>
+                                    {{ sale.created_at|date:"M d, Y" }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="receipt-info-grid">
+
+                            <div class="receipt-info">
+
+                                <h3>From</h3>
+
+                                <p>
+                                    <strong>QIST ERP</strong>
+                                </p>
+
+                                <p>
+                                    Installment Sales Management System
+                                </p>
+
+                            </div>
+
+
+                            <div class="receipt-info">
+
+                                <h3>Customer</h3>
+
+                                <p>
+                                    <strong>
+                                        {{ sale.customer.full_name }}
+                                    </strong>
+                                </p>
+
+                                <p>
+                                    Customer #{{ sale.customer.pk }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="receipt-meta">
+
+                            <div>
+                                <span>Sale ID</span>
+                                <strong>#{{ sale.pk }}</strong>
+                            </div>
+
+                            <div>
+                                <span>Payment Type</span>
+                                <strong>{{ sale.payment_type }}</strong>
+                            </div>
+
+                            <div>
+                                <span>Status</span>
+                                <strong>{{ sale.status }}</strong>
+                            </div>
+
+                            <div>
+                                <span>Created</span>
+                                <strong>
+                                    {{ sale.created_at|date:"M d, Y" }}
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="table-wrapper">
+
+                            <table class="data-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-center">Quantity</th>
+                                        <th class="text-right">Unit Price</th>
+                                        <th class="text-right">Discount</th>
+                                        <th class="text-right">Tax</th>
+                                        <th class="text-right">Total</th>
+                                    </tr>
+                                </thead>
+
+
+                                <tbody>
+
+                                {% for item in sale.items.all %}
+
+                                    <tr>
+
+                                        <td>
+                                            <strong>
+                                                {{ item.product.name }}
+                                            </strong>
+                                        </td>
+
+                                        <td class="text-center">
+                                            {{ item.quantity }}
+                                        </td>
+
+                                        <td class="text-right">
+                                            ${{ item.unit_price|floatformat:2 }}
+                                        </td>
+
+                                        <td class="text-right">
+                                            ${{ item.discount|floatformat:2 }}
+                                        </td>
+
+                                        <td class="text-right">
+                                            ${{ item.tax|floatformat:2 }}
+                                        </td>
+
+                                        <td class="text-right">
+                                            <strong>
+                                                ${{ item.total|floatformat:2 }}
+                                            </strong>
+                                        </td>
+
+                                    </tr>
+
+                                {% empty %}
+
+                                    <tr>
+                                        <td
+                                            colspan="6"
+                                            style="
+                                                text-align:center;
+                                                padding:35px;
+                                                color:#98a2b3;
+                                            "
+                                        >
+                                            No sale items found.
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+
+                        <div class="receipt-summary">
+
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+
+                                <strong>
+                                    ${{ sale.subtotal|floatformat:2 }}
+                                </strong>
+                            </div>
+
+
+                            <div class="summary-row">
+                                <span>Discount</span>
+
+                                <strong>
+                                    ${{ sale.discount|floatformat:2 }}
+                                </strong>
+                            </div>
+
+
+                            <div class="summary-row">
+                                <span>Tax</span>
+
+                                <strong>
+                                    ${{ sale.tax|floatformat:2 }}
+                                </strong>
+                            </div>
+
+
+                            <div class="summary-row total">
+                                <span>Total</span>
+
+                                <span>
+                                    ${{ sale.total_amount|floatformat:2 }}
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="receipt-footer">
+
+                            <span class="material-symbols-outlined">
+                                verified
+                            </span>
+
+                            <h3>
+                                Thank you for your purchase.
+                            </h3>
+
+                            <p>
+                                This is a system-generated receipt
+                                from QIST ERP.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
 </div>
 
 </body>

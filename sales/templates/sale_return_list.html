@@ -1,73 +1,616 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sales Returns Directory</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #0f172a; padding: 2rem; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .card { background: white; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
-        .search-bar { padding: 1rem; border-bottom: 1px solid #e2e8f0; background: #fafafa; }
-        .search-input { padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 4px; width: 300px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
-        th { background: #f8fafc; padding: 0.75rem 1rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 0.875rem 1rem; border-bottom: 1px solid #e2e8f0; }
-        .btn { padding: 0.375rem 0.75rem; border-radius: 4px; text-decoration: none; font-size: 0.8125rem; font-weight: 600; display: inline-block; }
-        .btn-info { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
-        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #334155; }
-        .badge { background: #fee2e2; color: #991b1b; padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: bold; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Returns & Refunds | QIST ERP</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/payments_support.css' %}"
+    >
 </head>
+
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>Sales Returns</h1>
-        <a href="{% url 'sales:sale_list' %}" class="btn btn-outline">&larr; Back to Sales</a>
-    </div>
+<div class="app-layout">
 
-    <div class="card">
-        <div class="search-bar">
-            <form method="get" action="{% url 'sales:sale_return_list' %}">
-                <input type="text" name="search" class="search-input" placeholder="Search by customer or sale ID..." value="{{ search_query }}">
-                <button type="submit" class="btn btn-outline">Search</button>
-            </form>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <div class="logo">
+                QIST <span>ERP</span>
+            </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Return ID</th>
-                    <th>Original Sale</th>
-                    <th>Customer</th>
-                    <th>Refund Amount</th>
-                    <th>Reason</th>
-                    <th>Date</th>
-                    <th style="text-align: right;">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ret in page_obj %}
-                <tr>
-                    <td><strong>#RET-{{ ret.id }}</strong></td>
-                    <td><a href="{% url 'sales:sale_detail' ret.sale.pk %}">#{{ ret.sale.id }}</a></td>
-                    <td>{{ ret.sale.customer.full_name }}</td>
-                    <td><span class="badge">${{ ret.refund_amount }}</span></td>
-                    <td>{{ ret.reason|truncatechars:30 }}</td>
-                    <td>{{ ret.created_at|date:"M d, Y - H:i" }}</td>
-                    <td style="text-align: right;">
-                        <a href="{% url 'sales:sale_return_detail' ret.pk %}" class="btn btn-info">View Details</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" style="text-align: center; color: #64748b; padding: 2rem;">No sales returns recorded yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <nav class="sidebar-menu">
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    dashboard
+                </span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    group
+                </span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    inventory_2
+                </span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    category
+                </span>
+                Categories
+            </a>
+
+            <a href="{% url 'sales:sale_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    shopping_cart
+                </span>
+                Sales
+            </a>
+
+            <a href="{% url 'installments:plan_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    calendar_month
+                </span>
+                Installment Plans
+            </a>
+
+            <a href="{% url 'installments:payment_ledger' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    payments
+                </span>
+                Payments
+            </a>
+
+            <a href="{% url 'installments:overdue_payments' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    schedule
+                </span>
+                Overdue Payments
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    receipt_long
+                </span>
+                Receipts
+            </a>
+
+            <a
+                href="{% url 'sales:sale_return_list' %}"
+                class="active"
+            >
+                <span class="material-symbols-outlined menu-icon">
+                    assignment_return
+                </span>
+                Returns & Refunds
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    analytics
+                </span>
+                Reports
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Topbar -->
+        <header class="topbar">
+
+            <div>
+                <div class="topbar-title">
+                    Returns Management
+                </div>
+
+                <div class="topbar-subtitle">
+                    Manage processed returns and refunds
+                </div>
+            </div>
+
+
+            <div class="user-info">
+
+                <div class="avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
+                <div>
+                    <div class="topbar-title">
+                        {{ request.user.username }}
+                    </div>
+
+                    <div class="topbar-subtitle">
+                        Administrator
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            <!-- Page Header -->
+            <div class="page-header">
+
+                <div>
+                    <h1>Returns & Refunds</h1>
+
+                    <p>
+                        Review processed product returns and customer refunds.
+                    </p>
+                </div>
+
+
+                <a
+                    href="{% url 'sales:sale_list' %}"
+                    class="primary-btn"
+                >
+                    <span class="material-symbols-outlined">
+                        add
+                    </span>
+
+                    Select Sale to Return
+                </a>
+
+            </div>
+
+
+            <!-- Summary Cards -->
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Returns on This Page
+                        </span>
+
+                        <span class="stat-value">
+                            {{ page_obj|length }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            assignment_return
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Total Return Records
+                        </span>
+
+                        <span class="stat-value">
+                            {{ page_obj.paginator.count }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            receipt_long
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Current Page
+                        </span>
+
+                        <span class="stat-value">
+                            {{ page_obj.number }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            menu_book
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Total Pages
+                        </span>
+
+                        <span class="stat-value">
+                            {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            layers
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Returns Table -->
+            <div class="data-card">
+
+                <div class="data-card-header">
+
+                    <h2>Processed Returns</h2>
+
+
+                    <form
+                        method="get"
+                        action="{% url 'sales:sale_return_list' %}"
+                        class="search-box"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            search
+                        </span>
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search_query }}"
+                            placeholder="Search return..."
+                            autocomplete="off"
+                        >
+
+                    </form>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>Return ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Sale #</th>
+                                <th class="text-right">
+                                    Refund Amount
+                                </th>
+                                <th>Reason</th>
+                                <th class="text-right">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for sale_return in page_obj %}
+
+                            <tr>
+
+                                <!-- Return ID -->
+                                <td>
+                                    <strong>
+                                        #{{ sale_return.pk }}
+                                    </strong>
+                                </td>
+
+
+                                <!-- Return Date -->
+                                <td>
+                                    {{ sale_return.return_date|date:"M d, Y" }}
+                                </td>
+
+
+                                <!-- Customer -->
+                                <td>
+
+                                    {% if sale_return.sale %}
+
+                                        <div class="customer">
+
+                                            <div class="customer-avatar">
+                                                {{ sale_return.sale.customer.full_name|slice:":2"|upper }}
+                                            </div>
+
+                                            <div>
+
+                                                <strong>
+                                                    {{ sale_return.sale.customer.full_name }}
+                                                </strong>
+
+                                                <small>
+                                                    Customer #{{ sale_return.sale.customer.pk }}
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    {% else %}
+
+                                        <span style="color:#98a2b3;">
+                                            Sale removed
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- Sale ID -->
+                                <td>
+
+                                    {% if sale_return.sale %}
+
+                                        #{{ sale_return.sale.pk }}
+
+                                    {% else %}
+
+                                        <span style="color:#98a2b3;">
+                                            —
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- Refund -->
+                                <td class="text-right">
+
+                                    <strong>
+                                        ${{ sale_return.refund_amount|floatformat:2 }}
+                                    </strong>
+
+                                </td>
+
+
+                                <!-- Reason -->
+                                <td>
+
+                                    {% if sale_return.reason %}
+
+                                        {{ sale_return.reason|truncatechars:40 }}
+
+                                    {% else %}
+
+                                        <span style="color:#98a2b3;">
+                                            No reason provided
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- Actions -->
+                                <td>
+
+                                    <div class="action-group">
+
+                                        <a
+                                            href="{% url 'sales:sale_return_detail' sale_return.pk %}"
+                                            class="action-btn"
+                                            title="View Return Details"
+                                        >
+                                            <span class="material-symbols-outlined">
+                                                visibility
+                                            </span>
+                                        </a>
+
+
+                                        {% if sale_return.sale %}
+
+                                            <a
+                                                href="{% url 'sales:sale_detail' sale_return.sale.pk %}"
+                                                class="action-btn"
+                                                title="View Sale"
+                                            >
+                                                <span class="material-symbols-outlined">
+                                                    shopping_cart
+                                                </span>
+                                            </a>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    style="
+                                        text-align:center;
+                                        padding:55px 20px;
+                                    "
+                                >
+
+                                    <span
+                                        class="material-symbols-outlined"
+                                        style="
+                                            font-size:44px;
+                                            color:#98a2b3;
+                                        "
+                                    >
+                                        assignment_return
+                                    </span>
+
+
+                                    <div
+                                        style="
+                                            margin-top:10px;
+                                            font-size:15px;
+                                            font-weight:600;
+                                        "
+                                    >
+
+                                        {% if search_query %}
+                                            No matching returns found
+                                        {% else %}
+                                            No returns processed yet
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <div
+                                        style="
+                                            margin-top:5px;
+                                            color:#98a2b3;
+                                            font-size:12px;
+                                        "
+                                    >
+
+                                        {% if search_query %}
+
+                                            Try searching with another
+                                            customer, sale, or return ID.
+
+                                        {% else %}
+
+                                            Process a return from an
+                                            existing sale to see it here.
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- Pagination -->
+                <div class="card-footer">
+
+                    <span>
+                        Showing
+                        {{ page_obj.start_index }}
+                        -
+                        {{ page_obj.end_index }}
+                        of
+                        {{ page_obj.paginator.count }}
+                        return{{ page_obj.paginator.count|pluralize }}
+                    </span>
+
+
+                    <div class="action-group">
+
+                        {% if page_obj.has_previous %}
+
+                            <a
+                                class="action-btn"
+                                href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                                title="Previous Page"
+                            >
+                                <span class="material-symbols-outlined">
+                                    chevron_left
+                                </span>
+                            </a>
+
+                        {% endif %}
+
+
+                        <span
+                            style="
+                                display:flex;
+                                align-items:center;
+                                padding:0 8px;
+                                font-size:12px;
+                                color:#667085;
+                            "
+                        >
+                            Page
+                            {{ page_obj.number }}
+                            of
+                            {{ page_obj.paginator.num_pages }}
+                        </span>
+
+
+                        {% if page_obj.has_next %}
+
+                            <a
+                                class="action-btn"
+                                href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                                title="Next Page"
+                            >
+                                <span class="material-symbols-outlined">
+                                    chevron_right
+                                </span>
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
 </div>
 
 </body>

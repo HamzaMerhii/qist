@@ -1,86 +1,283 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Payments Ledger - Qist ERP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Payment Ledger | QIST ERP</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/payments_support.css' %}"
+    >
 </head>
 
-<body class="bg-light">
+<body>
 
-    <div class="container py-4">
-        <h2 class="fw-bold mb-4">Global Payments Ledger</h2>
+<div class="app-layout">
 
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <div class="logo">QIST <span>ERP</span></div>
         </div>
-        {% endfor %}
-        {% endif %}
 
-        <div class="container py-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="fw-bold">Installment Accounts Summary</h2>
-                <form method="get" class="d-flex gap-2">
-                    <input type="text" name="q" value="{{ query }}" class="form-control"
-                        placeholder="Search customer or plan ID...">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </form>
-            </div>
+        <nav class="sidebar-menu">
 
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0 align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="ps-3">Plan #</th>
-                                    <th>Customer</th>
-                                    <th>Total Amount</th>
-                                    <th>Down Payment</th>
-                                    <th>Paid Inst.</th>
-                                    <th>Total Paid</th>
-                                    <th>Remaining Balance</th>
-                                    <th>Status</th>
-                                    <th class="text-end pe-3">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in plan_data %}
-                                <tr>
-                                    <td class="ps-3 fw-bold">#{{ item.plan.id }}</td>
-                                    <td>{{ item.plan.sale.customer.full_name|default:"Guest" }}</td>
-                                    <td>${{ item.plan.total_amount }}</td>
-                                    <td class="text-muted">${{ item.down_payment }}</td>
-                                    <td class="text-muted">${{ item.collected_installments }}</td>
-                                    <td class="text-success fw-semibold">${{ item.total_paid }}</td>
-                                    <td class="text-danger fw-bold">${{ item.remaining_balance }}</td>
-                                    <td>
-                                        {% if item.plan.status == 'COMPLETED' or item.remaining_balance == 0 %}
-                                        <span class="badge bg-success">COMPLETED</span>
-                                        {% else %}
-                                        <span class="badge bg-primary">ACTIVE</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-end pe-3">
-                                        <a href="{% url 'installments:plan_detail' item.plan.id %}"
-                                            class="btn btn-sm btn-outline-primary">
-                                            View Schedule & Pay
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="9" class="text-center py-4 text-muted">No installment accounts found.
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">dashboard</span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">group</span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}">
+                <span class="material-symbols-outlined menu-icon">inventory_2</span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="material-symbols-outlined menu-icon">category</span>
+                Categories
+            </a>
+
+            <a href="{% url 'sales:sale_list' %}">
+                <span class="material-symbols-outlined menu-icon">shopping_cart</span>
+                Sales
+            </a>
+
+            <a href="{% url 'installments:plan_list' %}">
+                <span class="material-symbols-outlined menu-icon">calendar_month</span>
+                Installment Plans
+            </a>
+
+            <a
+                href="{% url 'installments:payment_ledger' %}"
+                class="active"
+            >
+                <span class="material-symbols-outlined menu-icon">payments</span>
+                Payments
+            </a>
+
+            <a href="{% url 'installments:overdue_payments' %}">
+                <span class="material-symbols-outlined menu-icon">schedule</span>
+                Overdue Payments
+            </a>
+
+            <a href="{% url 'sales:sale_return_list' %}">
+                <span class="material-symbols-outlined menu-icon">assignment_return</span>
+                Returns & Refunds
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="topbar-title">Payment Ledger</div>
+                <div class="topbar-subtitle">
+                    Track installment collections and balances
                 </div>
             </div>
-        </div>
+
+            <div class="user-info">
+                <div class="avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
+                <div>
+                    <div class="topbar-title">{{ request.user.username }}</div>
+                    <div class="topbar-subtitle">Administrator</div>
+                </div>
+            </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            <div class="page-header">
+
+                <div>
+                    <h1>Payments</h1>
+
+                    <p>
+                        Monitor collected installments and outstanding balances.
+                    </p>
+                </div>
+
+                <a
+                    href="{% url 'installments:overdue_payments' %}"
+                    class="secondary-btn"
+                >
+                    <span class="material-symbols-outlined">schedule</span>
+                    Overdue Payments
+                </a>
+
+            </div>
+
+
+            <div class="data-card">
+
+                <div class="data-card-header">
+
+                    <h2>Payment Ledger</h2>
+
+                    <form
+                        method="get"
+                        action="{% url 'installments:payment_ledger' %}"
+                        class="search-box"
+                    >
+                        <span class="material-symbols-outlined">search</span>
+
+                        <input
+                            type="text"
+                            name="q"
+                            value="{{ query }}"
+                            placeholder="Search customer or plan..."
+                        >
+                    </form>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>Plan #</th>
+                                <th>Customer</th>
+                                <th>Sale #</th>
+                                <th class="text-right">Total Amount</th>
+                                <th class="text-right">Down Payment</th>
+                                <th class="text-right">Collected</th>
+                                <th class="text-right">Total Paid</th>
+                                <th class="text-right">Remaining</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                        {% for row in plan_data %}
+
+                            <tr>
+
+                                <td>
+                                    <strong>#{{ row.plan.pk }}</strong>
+                                </td>
+
+                                <td>
+                                    <div class="customer">
+
+                                        <div class="customer-avatar">
+                                            {{ row.plan.sale.customer.full_name|slice:":2"|upper }}
+                                        </div>
+
+                                        <div>
+                                            <strong>
+                                                {{ row.plan.sale.customer.full_name }}
+                                            </strong>
+
+                                            <small>
+                                                Customer #{{ row.plan.sale.customer.pk }}
+                                            </small>
+                                        </div>
+
+                                    </div>
+                                </td>
+
+                                <td>#{{ row.plan.sale.pk }}</td>
+
+                                <td class="text-right">
+                                    ${{ row.plan.total_amount|floatformat:2 }}
+                                </td>
+
+                                <td class="text-right">
+                                    ${{ row.down_payment|floatformat:2 }}
+                                </td>
+
+                                <td class="text-right">
+                                    ${{ row.collected_installments|floatformat:2 }}
+                                </td>
+
+                                <td class="text-right">
+                                    <strong>
+                                        ${{ row.total_paid|floatformat:2 }}
+                                    </strong>
+                                </td>
+
+                                <td class="text-right">
+                                    <strong>
+                                        ${{ row.remaining_balance|floatformat:2 }}
+                                    </strong>
+                                </td>
+
+                                <td>
+
+                                    <div class="action-group">
+
+                                        <a
+                                            href="{% url 'installments:plan_detail' row.plan.pk %}"
+                                            class="action-btn"
+                                            title="View Plan"
+                                        >
+                                            <span class="material-symbols-outlined">
+                                                visibility
+                                            </span>
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="9" style="text-align:center; padding:50px;">
+                                    No payment records found.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="card-footer">
+                    <span>{{ plan_data|length }} payment plan record{{ plan_data|length|pluralize }}</span>
+                    <span>Live installment data</span>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

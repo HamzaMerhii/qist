@@ -1,64 +1,505 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Return Sale #{{ sale.id }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 20px; }
-        .card { background: white; padding: 25px; border-radius: 6px; max-width: 800px; margin: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        .btn-danger { padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-secondary { padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin-left: 10px; }
-        .alert-error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Process Return | QIST ERP</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/payments_support.css' %}"
+    >
 </head>
+
 <body>
 
-<div class="card">
-    <h2>Process Return - Sale #{{ sale.id }}</h2>
-    <p><strong>Customer:</strong> {{ sale.customer.full_name }}</p>
+<div class="app-layout">
 
-    {% if error %}
-        <div class="alert-error">{{ error }}</div>
-    {% endif %}
+    <aside class="sidebar">
 
-    <form method="post">
-        {% csrf_token %}
-        <div style="margin-bottom: 15px;">
-            <label for="reason"><strong>Return Reason:</strong></label><br>
-            <input type="text" id="reason" name="reason" style="width: 100%; padding: 8px; margin-top: 5px;" placeholder="Damaged product, wrong item, customer request..." required>
+        <div class="sidebar-header">
+            <div class="logo">
+                QIST <span>ERP</span>
+            </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th>Product</th>
-                    <th>Purchased Qty</th>
-                    <th>Unit Price</th>
-                    <th>Qty to Return</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                <tr>
-                    <td><input type="checkbox" name="item_{{ item.pk }}"></td>
-                    <td>{{ item.product.name }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>${{ item.unit_price }}</td>
-                    <td>
-                        <input type="number" name="quantity_{{ item.pk }}" min="1" max="{{ item.quantity }}" value="{{ item.quantity }}" style="width: 70px;">
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <nav class="sidebar-menu">
 
-        <button type="submit" class="btn-danger">Confirm Return & Restock</button>
-        <a href="{% url 'sales:sale_detail' sale.pk %}" class="btn-secondary">Cancel</a>
-    </form>
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">dashboard</span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">group</span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}">
+                <span class="material-symbols-outlined menu-icon">inventory_2</span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="material-symbols-outlined menu-icon">category</span>
+                Categories
+            </a>
+
+            <a href="{% url 'sales:sale_list' %}">
+                <span class="material-symbols-outlined menu-icon">shopping_cart</span>
+                Sales
+            </a>
+
+            <a href="{% url 'installments:plan_list' %}">
+                <span class="material-symbols-outlined menu-icon">calendar_month</span>
+                Installment Plans
+            </a>
+
+            <a href="{% url 'installments:payment_ledger' %}">
+                <span class="material-symbols-outlined menu-icon">payments</span>
+                Payments
+            </a>
+
+            <a href="{% url 'installments:overdue_payments' %}">
+                <span class="material-symbols-outlined menu-icon">schedule</span>
+                Overdue Payments
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">receipt_long</span>
+                Receipts
+            </a>
+
+            <a
+                href="{% url 'sales:sale_return_list' %}"
+                class="active"
+            >
+                <span class="material-symbols-outlined menu-icon">
+                    assignment_return
+                </span>
+                Returns & Refunds
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">analytics</span>
+                Reports
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="topbar-title">
+                    Process Return
+                </div>
+
+                <div class="topbar-subtitle">
+                    Select sale items and calculate the refund
+                </div>
+            </div>
+
+            <div class="user-info">
+
+                <div class="avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
+                <div>
+                    <div class="topbar-title">
+                        {{ request.user.username }}
+                    </div>
+
+                    <div class="topbar-subtitle">
+                        Administrator
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            <div class="page-header">
+
+                <div>
+                    <h1>Process Return</h1>
+
+                    <p>
+                        Select the products and quantities to return
+                        from Sale #{{ sale.pk }}.
+                    </p>
+                </div>
+
+                <a
+                    href="{% url 'sales:sale_detail' sale.pk %}"
+                    class="secondary-btn"
+                >
+                    <span class="material-symbols-outlined">
+                        arrow_back
+                    </span>
+
+                    Back to Sale
+                </a>
+
+            </div>
+
+
+            {% if error %}
+
+                <div
+                    style="
+                        padding: 14px 16px;
+                        margin-bottom: 20px;
+                        border: 1px solid #fecaca;
+                        border-radius: 8px;
+                        background: #fef2f2;
+                        color: #b91c1c;
+                        font-size: 13px;
+                    "
+                >
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Sale ID
+                        </span>
+
+                        <span class="stat-value">
+                            #{{ sale.pk }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            shopping_cart
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Customer
+                        </span>
+
+                        <span
+                            class="stat-value"
+                            style="font-size:17px;"
+                        >
+                            {{ sale.customer.full_name }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            person
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Sale Total
+                        </span>
+
+                        <span class="stat-value">
+                            ${{ sale.total_amount|floatformat:2 }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            payments
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Available Items
+                        </span>
+
+                        <span class="stat-value">
+                            {{ items|length }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            inventory
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div
+                    class="data-card"
+                    style="margin-bottom:24px;"
+                >
+
+                    <div class="data-card-header">
+                        <h2>Select Items to Return</h2>
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table class="data-table">
+
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        Return
+                                    </th>
+
+                                    <th>
+                                        Product
+                                    </th>
+
+                                    <th class="text-center">
+                                        Purchased Qty
+                                    </th>
+
+                                    <th class="text-right">
+                                        Unit Price
+                                    </th>
+
+                                    <th class="text-center">
+                                        Return Qty
+                                    </th>
+                                </tr>
+                            </thead>
+
+
+                            <tbody>
+
+                            {% for item in items %}
+
+                                <tr>
+
+                                    <td class="text-center">
+
+                                        <input
+                                            type="checkbox"
+                                            name="item_{{ item.pk }}"
+                                            id="item_{{ item.pk }}"
+                                        >
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <label
+                                            for="item_{{ item.pk }}"
+                                            style="cursor:pointer;"
+                                        >
+
+                                            <strong>
+                                                {{ item.product.name }}
+                                            </strong>
+
+                                            <div
+                                                style="
+                                                    margin-top:3px;
+                                                    color:#98a2b3;
+                                                    font-size:10px;
+                                                "
+                                            >
+                                                Sale Item #{{ item.pk }}
+                                            </div>
+
+                                        </label>
+
+                                    </td>
+
+
+                                    <td class="text-center">
+                                        {{ item.quantity }}
+                                    </td>
+
+
+                                    <td class="text-right">
+                                        ${{ item.unit_price|floatformat:2 }}
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        <input
+                                            type="number"
+                                            name="quantity_{{ item.pk }}"
+                                            min="0"
+                                            max="{{ item.quantity }}"
+                                            value="0"
+                                            style="
+                                                width:85px;
+                                                height:36px;
+                                                padding:0 10px;
+                                                border:1px solid #d0d5dd;
+                                                border-radius:7px;
+                                                text-align:center;
+                                                outline:none;
+                                            "
+                                        >
+
+                                    </td>
+
+                                </tr>
+
+
+                            {% empty %}
+
+                                <tr>
+
+                                    <td
+                                        colspan="5"
+                                        style="
+                                            text-align:center;
+                                            padding:50px 20px;
+                                            color:#98a2b3;
+                                        "
+                                    >
+                                        No sale items are available for return.
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <div class="data-card">
+
+                    <div class="data-card-header">
+                        <h2>Return Reason</h2>
+                    </div>
+
+
+                    <div style="padding:20px;">
+
+                        <label
+                            for="reason"
+                            style="
+                                display:block;
+                                margin-bottom:8px;
+                                color:#475467;
+                                font-size:12px;
+                                font-weight:600;
+                            "
+                        >
+                            Reason for Return
+                        </label>
+
+
+                        <textarea
+                            id="reason"
+                            name="reason"
+                            rows="5"
+                            placeholder="Enter the reason for this return..."
+                            style="
+                                width:100%;
+                                resize:vertical;
+                                padding:12px 14px;
+                                border:1px solid #d0d5dd;
+                                border-radius:8px;
+                                outline:none;
+                                font-family:inherit;
+                                font-size:13px;
+                            "
+                        ></textarea>
+
+
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:flex-end;
+                                gap:10px;
+                                margin-top:20px;
+                            "
+                        >
+
+                            <a
+                                href="{% url 'sales:sale_detail' sale.pk %}"
+                                class="secondary-btn"
+                            >
+                                Cancel
+                            </a>
+
+
+                            <button
+                                type="submit"
+                                class="primary-btn"
+                                onclick="return confirm('Process this return and refund?');"
+                            >
+                                <span class="material-symbols-outlined">
+                                    assignment_return
+                                </span>
+
+                                Process Return
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </main>
+
 </div>
 
 </body>

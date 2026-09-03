@@ -1,71 +1,513 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Overdue Payments - Qist ERP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Overdue Payments | QIST ERP</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/payments_support.css' %}"
+    >
 </head>
-<body class="bg-light">
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-danger mb-1">Overdue Payments Queue</h2>
-            <p class="text-muted small mb-0">Payments that have passed their scheduled due date.</p>
-        </div>
-    </div>
+<body>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="app-layout">
+
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <div class="logo">
+                QIST <span>ERP</span>
             </div>
-        {% endfor %}
-    {% endif %}
+        </div>
 
-    <div class="card shadow-sm border-0 border-top border-danger border-3">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-3">Customer</th>
-                            <th>Email</th>
-                            <th>Inst. #</th>
-                            <th>Amount</th>
-                            <th>Due Date</th>
-                            <th class="text-end pe-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+        <nav class="sidebar-menu">
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    dashboard
+                </span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    group
+                </span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    inventory_2
+                </span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    category
+                </span>
+                Categories
+            </a>
+
+            <a href="{% url 'sales:sale_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    shopping_cart
+                </span>
+                Sales
+            </a>
+
+            <a href="{% url 'installments:plan_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    calendar_month
+                </span>
+                Installment Plans
+            </a>
+
+            <a href="{% url 'installments:payment_ledger' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    payments
+                </span>
+                Payments
+            </a>
+
+            <a
+                href="{% url 'installments:overdue_payments' %}"
+                class="active"
+            >
+                <span class="material-symbols-outlined menu-icon">
+                    schedule
+                </span>
+                Overdue Payments
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    receipt_long
+                </span>
+                Receipts
+            </a>
+
+            <a href="{% url 'sales:sale_return_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    assignment_return
+                </span>
+                Returns & Refunds
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    analytics
+                </span>
+                Reports
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="topbar-title">
+                    Payment Management
+                </div>
+
+                <div class="topbar-subtitle">
+                    Monitor overdue installments
+                </div>
+            </div>
+
+            <div class="user-info">
+
+                <div class="avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
+                <div>
+                    <div class="topbar-title">
+                        {{ request.user.username }}
+                    </div>
+
+                    <div class="topbar-subtitle">
+                        Administrator
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            <div class="page-header">
+
+                <div>
+                    <h1>Overdue Payments</h1>
+
+                    <p>
+                        Monitor and manage installment payments
+                        that have passed their due date.
+                    </p>
+                </div>
+
+                <a
+                    href="{% url 'installments:payment_ledger' %}"
+                    class="secondary-btn"
+                >
+                    <span class="material-symbols-outlined">
+                        account_balance_wallet
+                    </span>
+
+                    Payment Ledger
+                </a>
+
+            </div>
+
+
+            <div class="stats-grid">
+
+                <div class="stat-card danger">
+
+                    <div>
+                        <span class="stat-label">
+                            Overdue Installments
+                        </span>
+
+                        <span class="stat-value">
+                            {{ overdue_list|length }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            notification_important
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Current Date
+                        </span>
+
+                        <span
+                            class="stat-value"
+                            style="font-size: 18px;"
+                        >
+                            {{ today|date:"M d, Y" }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            calendar_today
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Payment Status
+                        </span>
+
+                        <span
+                            class="stat-value"
+                            style="font-size: 18px;"
+                        >
+                            Pending
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            pending_actions
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">
+                            Payment Queue
+                        </span>
+
+                        <span
+                            class="stat-value"
+                            style="font-size: 18px;"
+                        >
+                            Active
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            payments
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="data-card">
+
+                <div class="data-card-header">
+
+                    <div>
+                        <h2>Delinquent Installments</h2>
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Sale #</th>
+                                <th>Installment</th>
+                                <th>Due Date</th>
+
+                                <th class="text-right">
+                                    Amount Due
+                                </th>
+
+                                <th class="text-center">
+                                    Status
+                                </th>
+
+                                <th class="text-right">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+
+
+                        <tbody>
+
                         {% for payment in overdue_list %}
-                        <tr>
-                            <td class="ps-3 fw-bold">{{ payment.plan.sale.customer.full_name|default:"N/A" }}</td>
-                            <td>{{ payment.plan.sale.customer.email|default:"No Email" }}</td>
-                            <td>#{{ payment.installment_number }}</td>
-                            <td class="fw-bold text-danger">${{ payment.amount_due }}</td>
-                            <td>{{ payment.due_date }}</td>
-                            <td class="text-end pe-3">
-                                <form method="post" action="{% url 'installments:mark_payment_paid' payment.id %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="next" value="{{ request.path }}">
-                                    <button type="submit" class="btn btn-sm btn-success me-1">Mark Paid</button>
-                                </form>
-                            </td>
-                        </tr>
+
+                            <tr>
+
+                                <td>
+
+                                    <div class="customer">
+
+                                        <div class="customer-avatar">
+                                            {{ payment.plan.sale.customer.full_name|slice:":2"|upper }}
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                {{ payment.plan.sale.customer.full_name }}
+                                            </strong>
+
+                                            <small>
+                                                Customer #{{ payment.plan.sale.customer.pk }}
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+                                    #{{ payment.plan.sale.pk }}
+                                </td>
+
+
+                                <td>
+                                    {{ payment.installment_number }}
+                                    /
+                                    {{ payment.plan.number_of_months }}
+                                </td>
+
+
+                                <td>
+                                    {{ payment.due_date|date:"M d, Y" }}
+                                </td>
+
+
+                                <td class="text-right">
+
+                                    <strong>
+                                        ${{ payment.amount_due|floatformat:2 }}
+                                    </strong>
+
+                                </td>
+
+
+                                <td class="text-center">
+
+                                    <span class="status status-danger">
+                                        Overdue
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="action-group">
+
+                                        <a
+                                            href="{% url 'installments:plan_detail' payment.plan.pk %}"
+                                            class="action-btn"
+                                            title="View Installment Plan"
+                                        >
+                                            <span class="material-symbols-outlined">
+                                                visibility
+                                            </span>
+                                        </a>
+
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'installments:record_payment' payment.pk %}"
+                                            onsubmit="return confirm('Mark this installment as paid?');"
+                                        >
+
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="action-btn"
+                                                title="Record Payment"
+                                            >
+                                                <span class="material-symbols-outlined">
+                                                    price_check
+                                                </span>
+                                            </button>
+
+                                        </form>
+
+
+                                        <a
+                                            href="{% url 'installments:payment_receipt' payment.pk %}"
+                                            class="action-btn"
+                                            title="View Receipt"
+                                        >
+                                            <span class="material-symbols-outlined">
+                                                receipt_long
+                                            </span>
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
                         {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-success font-semibold">No overdue payments! All accounts are up to date.</td>
-                        </tr>
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    style="
+                                        text-align: center;
+                                        padding: 55px 20px;
+                                    "
+                                >
+
+                                    <span
+                                        class="material-symbols-outlined"
+                                        style="
+                                            font-size: 44px;
+                                            color: #98a2b3;
+                                        "
+                                    >
+                                        task_alt
+                                    </span>
+
+                                    <div
+                                        style="
+                                            margin-top: 10px;
+                                            font-size: 15px;
+                                            font-weight: 600;
+                                        "
+                                    >
+                                        No overdue payments
+                                    </div>
+
+                                    <div
+                                        style="
+                                            margin-top: 5px;
+                                            color: #98a2b3;
+                                            font-size: 12px;
+                                        "
+                                    >
+                                        All installment payments are currently up to date.
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
                         {% endfor %}
-                    </tbody>
-                </table>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="card-footer">
+
+                    <span>
+                        {{ overdue_list|length }}
+                        overdue installment{{ overdue_list|length|pluralize }}
+                    </span>
+
+                    <span>
+                        Live installment data
+                    </span>
+
+                </div>
+
             </div>
-        </div>
-    </div>
+
+        </section>
+
+    </main>
+
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

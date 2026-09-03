@@ -1,95 +1,386 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Create Sale</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 20px; }
-        .card { background: white; padding: 25px; border-radius: 6px; max-width: 900px; margin: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        .btn-submit { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 20px; }
-        .btn-cancel { padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin-left: 10px; }
-        .messages { color: red; margin-bottom: 15px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% if sale %}Edit Sale{% else %}Create Sale{% endif %}
+        | QIST ERP
+    </title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/payments_support.css' %}"
+    >
 </head>
+
 <body>
 
-<div class="card">
-    <h2>Create New Sale</h2>
-<!-- Global Messages -->
-    {% if messages %}
-        <div style="color: red; margin-bottom: 15px;">
-            {% for message in messages %}
-                <p><strong>{{ message }}</strong></p>
-            {% endfor %}
-        </div>
-    {% endif %}
+<div class="app-layout">
 
-    <!-- Form Validation Errors -->
-    {% if form.errors or formset.errors %}
-        <div style="color: red; background: #ffe6e6; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
-            <h4>Form Errors:</h4>
-            {{ form.errors }}
-            {{ formset.errors }}
-        </div>
-    {% endif %}
+    <aside class="sidebar">
 
-    <form method="post">
-        {% csrf_token %}
-        
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Customer</label>
-                {{ form.customer }}
-            </div>
-            <div class="form-group">
-                <label>Payment Type</label>
-                {{ form.payment_type }}
-            </div>
-            <div class="form-group">
-                <label>Overall Discount ($)</label>
-                {{ form.discount }}
-            </div>
-            <div class="form-group">
-                <label>Overall Tax ($)</label>
-                {{ form.tax }}
-            </div>
+        <div class="sidebar-header">
+            <div class="logo">QIST <span>ERP</span></div>
         </div>
 
-        <h3>Select Products</h3>
-        {{ formset.management_form }}
-        <table>
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Discount ($)</th>
-                    <th>Tax ($)</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item_form in formset %}
-                <tr>
-                    <td>{{ item_form.product }}</td>
-                    <td>{{ item_form.quantity }}</td>
-                    <td>{{ item_form.discount }}</td>
-                    <td>{{ item_form.tax }}</td>
-                    <td>{{ item_form.DELETE }}</td>
-                </tr>
+        <nav class="sidebar-menu">
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">dashboard</span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">group</span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}">
+                <span class="material-symbols-outlined menu-icon">inventory_2</span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="material-symbols-outlined menu-icon">category</span>
+                Categories
+            </a>
+
+            <a
+                href="{% url 'sales:sale_list' %}"
+                class="active"
+            >
+                <span class="material-symbols-outlined menu-icon">shopping_cart</span>
+                Sales
+            </a>
+
+            <a href="{% url 'installments:plan_list' %}">
+                <span class="material-symbols-outlined menu-icon">calendar_month</span>
+                Installment Plans
+            </a>
+
+            <a href="{% url 'installments:payment_ledger' %}">
+                <span class="material-symbols-outlined menu-icon">payments</span>
+                Payments
+            </a>
+
+            <a href="{% url 'installments:overdue_payments' %}">
+                <span class="material-symbols-outlined menu-icon">schedule</span>
+                Overdue Payments
+            </a>
+
+            <a href="{% url 'sales:sale_return_list' %}">
+                <span class="material-symbols-outlined menu-icon">assignment_return</span>
+                Returns & Refunds
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="topbar-title">
+                    {% if sale %}
+                        Edit Sale
+                    {% else %}
+                        Create Sale
+                    {% endif %}
+                </div>
+
+                <div class="topbar-subtitle">
+                    Manage customer sale transaction
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
+                <div>
+                    <div class="topbar-title">{{ request.user.username }}</div>
+                    <div class="topbar-subtitle">Administrator</div>
+                </div>
+            </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            <div class="page-header">
+
+                <div>
+
+                    <h1>
+                        {% if sale %}
+                            Edit Sale #{{ sale.pk }}
+                        {% else %}
+                            Create New Sale
+                        {% endif %}
+                    </h1>
+
+                    <p>
+                        Enter sale information and select the products
+                        included in the transaction.
+                    </p>
+
+                </div>
+
+                <a
+                    href="{% url 'sales:sale_list' %}"
+                    class="secondary-btn"
+                >
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Back to Sales
+                </a>
+
+            </div>
+
+
+            {% if messages %}
+
+                {% for message in messages %}
+
+                    <div
+                        style="
+                            padding:12px 16px;
+                            margin-bottom:18px;
+                            border-radius:8px;
+                            background:#fef2f2;
+                            border:1px solid #fecaca;
+                            color:#b91c1c;
+                        "
+                    >
+                        {{ message }}
+                    </div>
+
                 {% endfor %}
-            </tbody>
-        </table>
 
-        <button type="submit" class="btn-submit">Process Sale</button>
-        <a href="{% url 'sales:sale_list' %}" class="btn-cancel">Cancel</a>
-    </form>
+            {% endif %}
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+
+                <div class="data-card" style="margin-bottom:24px;">
+
+                    <div class="data-card-header">
+                        <h2>Sale Information</h2>
+                    </div>
+
+
+                    <div
+                        style="
+                            padding:22px;
+                            display:grid;
+                            grid-template-columns:repeat(2,minmax(0,1fr));
+                            gap:20px;
+                        "
+                    >
+
+                        {% for field in form.visible_fields %}
+
+                            <div>
+
+                                <label
+                                    for="{{ field.id_for_label }}"
+                                    style="
+                                        display:block;
+                                        margin-bottom:7px;
+                                        color:#475467;
+                                        font-size:12px;
+                                        font-weight:600;
+                                    "
+                                >
+                                    {{ field.label }}
+                                </label>
+
+                                <div>
+                                    {{ field }}
+                                </div>
+
+                                {% for error in field.errors %}
+                                    <div
+                                        style="
+                                            margin-top:5px;
+                                            color:#dc2626;
+                                            font-size:11px;
+                                        "
+                                    >
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                        {% endfor %}
+
+
+                        {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                {% if formset %}
+
+                    <div class="data-card">
+
+                        <div class="data-card-header">
+                            <h2>Select Products</h2>
+                        </div>
+
+
+                        {{ formset.management_form }}
+
+
+                        {% if formset.non_form_errors %}
+
+                            <div
+                                style="
+                                    margin:20px;
+                                    padding:12px;
+                                    background:#fef2f2;
+                                    color:#b91c1c;
+                                    border-radius:8px;
+                                "
+                            >
+                                {{ formset.non_form_errors }}
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="table-wrapper">
+
+                            <table class="data-table">
+
+                                <thead>
+                                    <tr>
+
+                                        {% if formset.forms %}
+
+                                            {% for field in formset.forms.0.visible_fields %}
+                                                <th>
+                                                    {{ field.label }}
+                                                </th>
+                                            {% endfor %}
+
+                                        {% endif %}
+
+                                    </tr>
+                                </thead>
+
+
+                                <tbody>
+
+                                {% for item_form in formset.forms %}
+
+                                    <tr>
+
+                                        {% for hidden in item_form.hidden_fields %}
+                                            {{ hidden }}
+                                        {% endfor %}
+
+
+                                        {% for field in item_form.visible_fields %}
+
+                                            <td>
+
+                                                {{ field }}
+
+                                                {% for error in field.errors %}
+
+                                                    <div
+                                                        style="
+                                                            color:#dc2626;
+                                                            font-size:10px;
+                                                            margin-top:4px;
+                                                        "
+                                                    >
+                                                        {{ error }}
+                                                    </div>
+
+                                                {% endfor %}
+
+                                            </td>
+
+                                        {% endfor %}
+
+                                    </tr>
+
+                                {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+                <div
+                    style="
+                        display:flex;
+                        justify-content:flex-end;
+                        gap:10px;
+                        margin-top:24px;
+                    "
+                >
+
+                    <a
+                        href="{% url 'sales:sale_list' %}"
+                        class="secondary-btn"
+                    >
+                        Cancel
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="primary-btn"
+                    >
+                        <span class="material-symbols-outlined">
+                            check_circle
+                        </span>
+
+                        {% if sale %}
+                            Save Changes
+                        {% else %}
+                            Process Sale
+                        {% endif %}
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </main>
+
 </div>
 
 </body>

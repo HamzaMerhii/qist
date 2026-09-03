@@ -1,63 +1,437 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sale #{{ sale.id }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f6f9; }
-        .card { background: white; padding: 25px; border-radius: 6px; max-width: 800px; margin: auto; }
-        .info { background: #e9ecef; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        .btn { padding: 8px 12px; text-decoration: none; border-radius: 4px; color: white; font-size: 13px; }
-        .btn-return { background: #dc3545; }
-        .btn-back { background: #6c757d; }
-        .actions { margin-top: 20px; display: flex; gap: 10px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sale Details | QIST ERP</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/payments_support.css' %}"
+    >
 </head>
+
 <body>
 
-<div class="card">
-    <h2>Order #{{ sale.id }} Details</h2>
-    
-    <div class="info">
-        <strong>Customer:</strong> {{ sale.customer.full_name }} ({{ sale.customer.phone }})<br>
-        <strong>Payment Type:</strong> {{ sale.payment_type }} | <strong>Status:</strong> {{ sale.status }}<br>
-        <strong>Subtotal:</strong> ${{ sale.subtotal }} | <strong>Discount:</strong> ${{ sale.discount }} | <strong>Tax:</strong> ${{ sale.tax }}<br>
-        <strong>Total Amount:</strong> ${{ sale.total_amount }}
-    </div>
+<div class="app-layout">
 
-    <h3>Items Purchased</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-            <tr>
-                <td>{{ item.product.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>${{ item.unit_price }}</td>
-                <td>${{ item.total }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">No items attached to this sale.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <aside class="sidebar">
 
-    <div class="actions">
-        <a href="{% url 'sales:sale_return' sale.pk %}" class="btn btn-return">Process Return</a>
-        <a href="{% url 'sales:sale_list' %}" class="btn btn-back">Back to Sales</a>
-    </div>
+        <div class="sidebar-header">
+            <div class="logo">QIST <span>ERP</span></div>
+        </div>
+
+        <nav class="sidebar-menu">
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">dashboard</span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">group</span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}">
+                <span class="material-symbols-outlined menu-icon">inventory_2</span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="material-symbols-outlined menu-icon">category</span>
+                Categories
+            </a>
+
+            <a
+                href="{% url 'sales:sale_list' %}"
+                class="active"
+            >
+                <span class="material-symbols-outlined menu-icon">shopping_cart</span>
+                Sales
+            </a>
+
+            <a href="{% url 'installments:plan_list' %}">
+                <span class="material-symbols-outlined menu-icon">calendar_month</span>
+                Installment Plans
+            </a>
+
+            <a href="{% url 'installments:payment_ledger' %}">
+                <span class="material-symbols-outlined menu-icon">payments</span>
+                Payments
+            </a>
+
+            <a href="{% url 'installments:overdue_payments' %}">
+                <span class="material-symbols-outlined menu-icon">schedule</span>
+                Overdue Payments
+            </a>
+
+            <a href="{% url 'sales:sale_return_list' %}">
+                <span class="material-symbols-outlined menu-icon">assignment_return</span>
+                Returns & Refunds
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="topbar-title">Sale Details</div>
+                <div class="topbar-subtitle">Sale #{{ sale.pk }}</div>
+            </div>
+
+            <div class="user-info">
+                <div class="avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
+                <div>
+                    <div class="topbar-title">{{ request.user.username }}</div>
+                    <div class="topbar-subtitle">Administrator</div>
+                </div>
+            </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            <div class="page-header">
+
+                <div>
+                    <h1>Sale #{{ sale.pk }}</h1>
+
+                    <p>
+                        Created {{ sale.created_at|date:"M d, Y" }}
+                        for {{ sale.customer.full_name }}.
+                    </p>
+                </div>
+
+
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+                    <a
+                        href="{% url 'sales:sale_list' %}"
+                        class="secondary-btn"
+                    >
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        Back
+                    </a>
+
+                    <a
+                        href="{% url 'sales:sale_receipt' sale.pk %}"
+                        class="secondary-btn"
+                    >
+                        <span class="material-symbols-outlined">receipt_long</span>
+                        Receipt
+                    </a>
+
+                    <a
+                        href="{% url 'sales:sale_return' sale.pk %}"
+                        class="primary-btn"
+                    >
+                        <span class="material-symbols-outlined">
+                            assignment_return
+                        </span>
+
+                        Process Return
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">Sale Total</span>
+                        <span class="stat-value">
+                            ${{ sale.total_amount|floatformat:2 }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">Payment Type</span>
+
+                        <span
+                            class="stat-value"
+                            style="font-size:17px;"
+                        >
+                            {{ sale.payment_type }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">credit_card</span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">Status</span>
+
+                        <span
+                            class="stat-value"
+                            style="font-size:17px;"
+                        >
+                            {{ sale.status }}
+                        </span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">task_alt</span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+                        <span class="stat-label">Products</span>
+                        <span class="stat-value">{{ items|length }}</span>
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">inventory</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="data-card" style="margin-bottom:24px;">
+
+                <div class="data-card-header">
+                    <h2>Sale Information</h2>
+                </div>
+
+                <div
+                    style="
+                        display:grid;
+                        grid-template-columns:repeat(4,minmax(0,1fr));
+                        gap:20px;
+                        padding:20px;
+                    "
+                >
+
+                    <div>
+                        <span class="stat-label">Customer</span>
+                        <strong>{{ sale.customer.full_name }}</strong>
+                    </div>
+
+                    <div>
+                        <span class="stat-label">Subtotal</span>
+                        <strong>${{ sale.subtotal|floatformat:2 }}</strong>
+                    </div>
+
+                    <div>
+                        <span class="stat-label">Discount</span>
+                        <strong>${{ sale.discount|floatformat:2 }}</strong>
+                    </div>
+
+                    <div>
+                        <span class="stat-label">Tax</span>
+                        <strong>${{ sale.tax|floatformat:2 }}</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="data-card" style="margin-bottom:24px;">
+
+                <div class="data-card-header">
+
+                    <h2>Sale Items</h2>
+
+                    <a
+                        href="{% url 'sales:sale_items' sale.pk %}"
+                        class="secondary-btn"
+                    >
+                        View Items
+                    </a>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-center">Quantity</th>
+                                <th class="text-right">Unit Price</th>
+                                <th class="text-right">Discount</th>
+                                <th class="text-right">Tax</th>
+                                <th class="text-right">Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                        {% for item in items %}
+
+                            <tr>
+
+                                <td>
+                                    <strong>{{ item.product.name }}</strong>
+                                </td>
+
+                                <td class="text-center">
+                                    {{ item.quantity }}
+                                </td>
+
+                                <td class="text-right">
+                                    ${{ item.unit_price|floatformat:2 }}
+                                </td>
+
+                                <td class="text-right">
+                                    ${{ item.discount|floatformat:2 }}
+                                </td>
+
+                                <td class="text-right">
+                                    ${{ item.tax|floatformat:2 }}
+                                </td>
+
+                                <td class="text-right">
+                                    <strong>
+                                        ${{ item.total|floatformat:2 }}
+                                    </strong>
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="6" style="text-align:center; padding:45px;">
+                                    No sale items found.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            {% if returns %}
+
+                <div class="data-card">
+
+                    <div class="data-card-header">
+                        <h2>Returns</h2>
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table class="data-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Return #</th>
+                                    <th>Date</th>
+                                    <th>Reason</th>
+                                    <th class="text-right">Refund</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                            {% for sale_return in returns %}
+
+                                <tr>
+
+                                    <td>
+                                        #{{ sale_return.pk }}
+                                    </td>
+
+                                    <td>
+                                        {{ sale_return.return_date|date:"M d, Y" }}
+                                    </td>
+
+                                    <td>
+                                        {{ sale_return.reason|truncatechars:45 }}
+                                    </td>
+
+                                    <td class="text-right">
+                                        ${{ sale_return.refund_amount|floatformat:2 }}
+                                    </td>
+
+                                    <td>
+
+                                        <div class="action-group">
+
+                                            <a
+                                                href="{% url 'sales:sale_return_detail' sale_return.pk %}"
+                                                class="action-btn"
+                                            >
+                                                <span class="material-symbols-outlined">
+                                                    visibility
+                                                </span>
+                                            </a>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </main>
+
 </div>
 
 </body>

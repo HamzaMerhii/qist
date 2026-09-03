@@ -1,67 +1,413 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Payment Receipt #{{ payment.id }} - Qist ERP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background-color: #fff !important; }
-            .receipt-card { border: none !important; shadow: none !important; }
-        }
-        .receipt-card { max-width: 500px; margin: 0 auto; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Payment Receipt | QIST ERP</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/payments_support.css' %}"
+    >
 </head>
-<body class="bg-light py-4">
 
-<div class="container">
-    <div class="text-center mb-3 no-print">
-        <button onclick="window.print()" class="btn btn-success btn-sm me-2">Print Receipt</button>
-        <a href="{% url 'installments:payment_ledger' %}" class="btn btn-outline-secondary btn-sm">&larr; Back to Ledger</a>
-    </div>
+<body>
 
-    <div class="card receipt-card shadow-sm border-0 p-4">
-        <div class="text-center mb-3">
-            <h4 class="fw-bold mb-0">QIST ERP STORE</h4>
-            <p class="text-muted small mb-0">Installment Payment Receipt</p>
-            <hr>
-        </div>
+<div class="app-layout">
 
-        <div class="small mb-3">
-            <div class="d-flex justify-content-between mb-1">
-                <span>Receipt Number:</span>
-                <strong>PAY-{{ payment.id }}</strong>
-            </div>
-            <div class="d-flex justify-content-between mb-1">
-                <span>Payment Date:</span>
-                <strong>{{ payment.paid_date|default:payment.due_date }}</strong>
-            </div>
-            <div class="d-flex justify-content-between mb-1">
-                <span>Customer:</span>
-                <strong>{{ payment.plan.sale.customer.full_name|default:"Guest" }}</strong>
-            </div>
-            <div class="d-flex justify-content-between mb-1">
-                <span>Plan Reference:</span>
-                <strong>Plan #{{ payment.plan.id }}</strong>
-            </div>
-            <div class="d-flex justify-content-between">
-                <span>Installment #:</span>
-                <strong>#{{ payment.installment_number }}</strong>
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <div class="logo">
+                QIST <span>ERP</span>
             </div>
         </div>
 
-        <div class="border-top border-bottom py-2 my-3">
-            <div class="d-flex justify-content-between fw-bold text-success fs-5">
-                <span>Amount Paid:</span>
-                <span>${{ payment.amount_due }}</span>
-            </div>
-        </div>
+        <nav class="sidebar-menu">
 
-        <div class="text-center text-muted small mt-4">
-            <p class="mb-0">Payment successfully recorded.</p>
-        </div>
-    </div>
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">dashboard</span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">group</span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}">
+                <span class="material-symbols-outlined menu-icon">inventory_2</span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="material-symbols-outlined menu-icon">category</span>
+                Categories
+            </a>
+
+            <a href="{% url 'sales:sale_list' %}">
+                <span class="material-symbols-outlined menu-icon">shopping_cart</span>
+                Sales
+            </a>
+
+            <a href="{% url 'installments:plan_list' %}">
+                <span class="material-symbols-outlined menu-icon">calendar_month</span>
+                Installment Plans
+            </a>
+
+            <a
+                href="{% url 'installments:payment_ledger' %}"
+                class="active"
+            >
+                <span class="material-symbols-outlined menu-icon">payments</span>
+                Payments
+            </a>
+
+            <a href="{% url 'installments:overdue_payments' %}">
+                <span class="material-symbols-outlined menu-icon">schedule</span>
+                Overdue Payments
+            </a>
+
+            <a href="{% url 'sales:sale_return_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    assignment_return
+                </span>
+                Returns & Refunds
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">analytics</span>
+                Reports
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="topbar-title">
+                    Payment Receipt
+                </div>
+
+                <div class="topbar-subtitle">
+                    Installment payment transaction
+                </div>
+            </div>
+
+            <div class="user-info">
+
+                <div class="avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
+                <div>
+                    <div class="topbar-title">
+                        {{ request.user.username }}
+                    </div>
+
+                    <div class="topbar-subtitle">
+                        Administrator
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            <div class="receipt-page">
+
+                <div class="receipt-actions">
+
+                    <a
+                        href="{% url 'installments:plan_detail' payment.plan.pk %}"
+                        class="secondary-btn"
+                    >
+                        <span class="material-symbols-outlined">
+                            arrow_back
+                        </span>
+
+                        Back to Plan
+                    </a>
+
+
+                    <button
+                        type="button"
+                        class="primary-btn"
+                        onclick="window.print()"
+                    >
+                        <span class="material-symbols-outlined">
+                            print
+                        </span>
+
+                        Print Receipt
+                    </button>
+
+                </div>
+
+
+                <div class="receipt-card">
+
+                    <div class="receipt-line"></div>
+
+
+                    <div class="receipt-body">
+
+                        <div class="receipt-header">
+
+                            <div class="receipt-brand">
+
+                                <div class="receipt-logo">
+                                    Q
+                                </div>
+
+                                <div>
+                                    <h2>QIST ERP</h2>
+
+                                    <p>
+                                        Installment Sales Management
+                                    </p>
+                                </div>
+
+                            </div>
+
+
+                            <div class="receipt-title">
+
+                                <h2>Payment Receipt</h2>
+
+                                <p>
+                                    <strong>Payment No:</strong>
+                                    #{{ payment.pk }}
+                                </p>
+
+                                <p>
+                                    <strong>Installment:</strong>
+                                    {{ payment.installment_number }}
+                                    /
+                                    {{ payment.plan.number_of_months }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="receipt-info-grid">
+
+                            <div class="receipt-info">
+
+                                <h3>Customer</h3>
+
+                                <p>
+                                    <strong>
+                                        {{ payment.plan.sale.customer.full_name }}
+                                    </strong>
+                                </p>
+
+                                <p>
+                                    Customer #{{ payment.plan.sale.customer.pk }}
+                                </p>
+
+                            </div>
+
+
+                            <div class="receipt-info">
+
+                                <h3>Related Sale</h3>
+
+                                <p>
+                                    <strong>
+                                        Sale #{{ payment.plan.sale.pk }}
+                                    </strong>
+                                </p>
+
+                                <p>
+                                    Plan #{{ payment.plan.pk }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="receipt-meta">
+
+                            <div>
+                                <span>Payment ID</span>
+                                <strong>#{{ payment.pk }}</strong>
+                            </div>
+
+                            <div>
+                                <span>Status</span>
+                                <strong>{{ payment.status }}</strong>
+                            </div>
+
+                            <div>
+                                <span>Due Date</span>
+                                <strong>
+                                    {{ payment.due_date|date:"M d, Y" }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Paid Date</span>
+
+                                <strong>
+                                    {% if payment.paid_date %}
+                                        {{ payment.paid_date|date:"M d, Y" }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </strong>
+                            </div>
+
+                        </div>
+
+
+                        <div class="table-wrapper">
+
+                            <table class="data-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+
+                                        <th class="text-right">
+                                            Amount
+                                        </th>
+                                    </tr>
+                                </thead>
+
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td>
+                                            Installment
+                                            #{{ payment.installment_number }}
+                                            of
+                                            {{ payment.plan.number_of_months }}
+
+                                            for Sale
+                                            #{{ payment.plan.sale.pk }}
+                                        </td>
+
+
+                                        <td class="text-right">
+                                            <strong>
+                                                ${{ payment.amount_due|floatformat:2 }}
+                                            </strong>
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+
+                        <div class="receipt-summary">
+
+                            <div class="summary-row">
+
+                                <span>
+                                    Plan Total
+                                </span>
+
+                                <strong>
+                                    ${{ payment.plan.total_amount|floatformat:2 }}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="summary-row">
+
+                                <span>
+                                    Down Payment
+                                </span>
+
+                                <strong>
+                                    ${{ payment.plan.down_payment|floatformat:2 }}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="summary-row">
+
+                                <span>
+                                    Remaining Balance
+                                </span>
+
+                                <strong>
+                                    ${{ payment.plan.remaining_balance|floatformat:2 }}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="summary-row total">
+
+                                <span>
+                                    Installment Amount
+                                </span>
+
+                                <span>
+                                    ${{ payment.amount_due|floatformat:2 }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="receipt-footer">
+
+                            <span class="material-symbols-outlined">
+                                verified
+                            </span>
+
+                            <h3>
+                                Payment Receipt
+                            </h3>
+
+                            <p>
+                                This receipt was generated automatically
+                                by QIST ERP.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
 </div>
 
 </body>

@@ -1,313 +1,622 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Directory</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg-body: #f8fafc;
-            --surface: #ffffff;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --warning: #d97706;
-            --warning-bg: #fef3c7;
-            --info: #0284c7;
-            --info-bg: #e0f2fe;
-            --success: #16a34a;
-            --success-bg: #dcfce7;
-        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-dark);
-            margin: 0;
-            padding: 2rem;
-        }
+    <title>Sales | QIST ERP</title>
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+    >
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 1.75rem;
-            font-weight: 700;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-            transition: background-color 0.2s;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-dark);
-        }
-
-        .btn-outline:hover {
-            background-color: #f1f5f9;
-        }
-
-        .btn-sm {
-            padding: 0.25rem 0.625rem;
-            font-size: 0.8125rem;
-        }
-
-        .btn-warning {
-            background-color: var(--warning-bg);
-            color: var(--warning);
-            border: 1px solid #fde68a;
-        }
-
-        .btn-warning:hover {
-            background-color: #fde68a;
-        }
-
-        .btn-info {
-            background-color: var(--info-bg);
-            color: var(--info);
-            border: 1px solid #bae6fd;
-        }
-
-        .btn-info:hover {
-            background-color: #bae6fd;
-        }
-
-        .card {
-            background: var(--surface);
-            border-radius: 0.5rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        .search-bar {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            background-color: #fafafa;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-        }
-
-        .search-input:focus {
-            outline: 2px solid var(--primary);
-            outline-offset: -1px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.875rem;
-        }
-
-        th {
-            background-color: #f8fafc;
-            padding: 0.75rem 1rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-        }
-
-        td {
-            padding: 0.875rem 1rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-dark);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover {
-            background-color: #f8fafc;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .badge-payment {
-            background-color: #f3e8ff;
-            color: #6b21a8;
-        }
-
-        .actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            border-top: 1px solid var(--border);
-            background-color: #fafafa;
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
-
-        .pagination-links {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .empty-state {
-            padding: 3rem 1rem;
-            text-align: center;
-            color: var(--text-muted);
-        }
-    </style>
+    <link
+        rel="stylesheet"
+        href="{% static 'css/payments_support.css' %}"
+    >
 </head>
 
 <body>
 
-    <div class="container">
-        <div class="header">
-            <h1>Sales Directory</h1>
-            <a href="{% url 'sales:sale_create' %}" class="btn btn-primary">+ New Sale</a>
+<div class="app-layout">
+
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <div class="logo">
+                QIST <span>ERP</span>
+            </div>
         </div>
 
-        <div class="card">
-            <!-- Search Controls -->
-            <div class="search-bar">
-                <form method="get" action="{% url 'sales:sale_list' %}" class="search-form">
-                    <input type="text" name="search" class="search-input"
-                        placeholder="Search by customer name or sale ID..." value="{{ search_query }}">
-                    <button type="submit" class="btn btn-outline">Search</button>
-                    {% if search_query %}
-                    <a href="{% url 'sales:sale_list' %}" class="btn btn-outline">Clear</a>
-                    {% endif %}
-                </form>
+        <nav class="sidebar-menu">
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    dashboard
+                </span>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    group
+                </span>
+                Customers
+            </a>
+
+            <a href="{% url 'product_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    inventory_2
+                </span>
+                Products
+            </a>
+
+            <a href="{% url 'category_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    category
+                </span>
+                Categories
+            </a>
+
+            <a
+                href="{% url 'sales:sale_list' %}"
+                class="active"
+            >
+                <span class="material-symbols-outlined menu-icon">
+                    shopping_cart
+                </span>
+                Sales
+            </a>
+
+            <a href="{% url 'installments:plan_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    calendar_month
+                </span>
+                Installment Plans
+            </a>
+
+            <a href="{% url 'installments:payment_ledger' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    payments
+                </span>
+                Payments
+            </a>
+
+            <a href="{% url 'installments:overdue_payments' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    schedule
+                </span>
+                Overdue Payments
+            </a>
+
+            <a href="{% url 'sales:sale_return_list' %}">
+                <span class="material-symbols-outlined menu-icon">
+                    assignment_return
+                </span>
+                Returns & Refunds
+            </a>
+
+            <a href="#">
+                <span class="material-symbols-outlined menu-icon">
+                    analytics
+                </span>
+                Reports
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+
+                <div class="topbar-title">
+                    Sales Management
+                </div>
+
+                <div class="topbar-subtitle">
+                    Monitor and manage sales transactions
+                </div>
+
             </div>
 
-            <!-- Sales Data Table -->
-            <table>
-                <thead>
-                    <tr>
-                        <th>Sale ID</th>
-                        <th>Customer</th>
-                        <th>Payment Type</th>
-                        <th>Total Amount</th>
-                        <th>Date</th>
-                        <th style="text-align: right;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for sale in page_obj %}
-                    <tr>
-                        <td><strong>#{{ sale.id }}</strong></td>
-                        <td>{{ sale.customer.full_name }}</td>
-                        <td>
-                            <span class="badge badge-payment">
-                                {{ sale.get_payment_type_display|default:sale.payment_type }}
-                            </span>
-                        </td>
-                        <td><strong>${{ sale.total_amount }}</strong></td>
-                        <td>{{ sale.created_at|date:"M d, Y - H:i" }}</td>
-                        <td style="text-align: right;">
-                            <div class="actions" style="justify-content: flex-end;">
-                                <a href="{% url 'sales:sale_detail' sale.pk %}" class="btn btn-sm btn-info">View
-                                    Details</a>
-                                <a href="{% url 'sales:sale_return' sale.pk %}"
-                                    class="btn btn-sm btn-warning">Return</a>
-                                <a href="{% url 'sales:sale_receipt' sale.pk %}" class="btn btn-sm btn-outline-primary"
-                                    target="_blank">
-                                    Receipt
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6">
-                            <div class="empty-state">
-                                <p>No sales records found.</p>
-                                {% if search_query %}
-                                <small>Try searching with a different term.</small>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
 
-            <!-- Pagination Controls -->
-            {% if page_obj.has_other_pages %}
-            <div class="pagination">
+            <div class="user-info">
+
+                <div class="avatar">
+                    {{ request.user.username|slice:":2"|upper }}
+                </div>
+
                 <div>
-                    Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                </div>
-                <div class="pagination-links">
-                    {% if page_obj.has_previous %}
-                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}"
-                        class="btn btn-sm btn-outline">&laquo; First</a>
-                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}"
-                        class="btn btn-sm btn-outline">Previous</a>
-                    {% endif %}
 
-                    {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}"
-                        class="btn btn-sm btn-outline">Next</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}"
-                        class="btn btn-sm btn-outline">Last &raquo;</a>
-                    {% endif %}
+                    <div class="topbar-title">
+                        {{ request.user.username }}
+                    </div>
+
+                    <div class="topbar-subtitle">
+                        Administrator
+                    </div>
+
                 </div>
+
             </div>
-            {% endif %}
-        </div>
-    </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            <div class="page-header">
+
+                <div>
+                    <h1>Sales</h1>
+
+                    <p>
+                        Create, review, and manage customer sales transactions.
+                    </p>
+                </div>
+
+
+                <a
+                    href="{% url 'sales:sale_create' %}"
+                    class="primary-btn"
+                >
+                    <span class="material-symbols-outlined">
+                        add
+                    </span>
+
+                    Create Sale
+                </a>
+
+            </div>
+
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div>
+
+                        <span class="stat-label">
+                            Total Sales Records
+                        </span>
+
+                        <span class="stat-value">
+                            {{ page_obj.paginator.count }}
+                        </span>
+
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            shopping_cart
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+
+                        <span class="stat-label">
+                            Sales on This Page
+                        </span>
+
+                        <span class="stat-value">
+                            {{ page_obj|length }}
+                        </span>
+
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            receipt_long
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+
+                        <span class="stat-label">
+                            Current Page
+                        </span>
+
+                        <span class="stat-value">
+                            {{ page_obj.number }}
+                        </span>
+
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            menu_book
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div>
+
+                        <span class="stat-label">
+                            Total Pages
+                        </span>
+
+                        <span class="stat-value">
+                            {{ page_obj.paginator.num_pages }}
+                        </span>
+
+                    </div>
+
+                    <div class="stat-icon">
+                        <span class="material-symbols-outlined">
+                            layers
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="data-card">
+
+                <div class="data-card-header">
+
+                    <h2>Sales Transactions</h2>
+
+
+                    <form
+                        method="get"
+                        action="{% url 'sales:sale_list' %}"
+                        class="search-box"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            search
+                        </span>
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search_query }}"
+                            placeholder="Search customer or sale..."
+                            autocomplete="off"
+                        >
+
+                    </form>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Sale #</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Payment Type</th>
+                                <th class="text-right">Subtotal</th>
+                                <th class="text-right">Discount</th>
+                                <th class="text-right">Tax</th>
+                                <th class="text-right">Total</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for sale in page_obj %}
+
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        #{{ sale.pk }}
+                                    </strong>
+                                </td>
+
+
+                                <td>
+                                    {{ sale.created_at|date:"M d, Y" }}
+                                </td>
+
+
+                                <td>
+
+                                    <div class="customer">
+
+                                        <div class="customer-avatar">
+                                            {{ sale.customer.full_name|slice:":2"|upper }}
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                {{ sale.customer.full_name }}
+                                            </strong>
+
+                                            <small>
+                                                Customer #{{ sale.customer.pk }}
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+                                    {{ sale.payment_type }}
+                                </td>
+
+
+                                <td class="text-right">
+                                    ${{ sale.subtotal|floatformat:2 }}
+                                </td>
+
+
+                                <td class="text-right">
+                                    ${{ sale.discount|floatformat:2 }}
+                                </td>
+
+
+                                <td class="text-right">
+                                    ${{ sale.tax|floatformat:2 }}
+                                </td>
+
+
+                                <td class="text-right">
+
+                                    <strong>
+                                        ${{ sale.total_amount|floatformat:2 }}
+                                    </strong>
+
+                                </td>
+
+
+                                <td class="text-center">
+
+                                    {% if sale.status == "COMPLETED" %}
+
+                                        <span class="status status-success">
+                                            Completed
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status status-info">
+                                            {{ sale.status }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="action-group">
+
+                                        <a
+                                            href="{% url 'sales:sale_detail' sale.pk %}"
+                                            class="action-btn"
+                                            title="View Sale"
+                                        >
+                                            <span class="material-symbols-outlined">
+                                                visibility
+                                            </span>
+                                        </a>
+
+
+                                        <a
+                                            href="{% url 'sales:sale_update' sale.pk %}"
+                                            class="action-btn"
+                                            title="Edit Sale"
+                                        >
+                                            <span class="material-symbols-outlined">
+                                                edit
+                                            </span>
+                                        </a>
+
+
+                                        <a
+                                            href="{% url 'sales:sale_receipt' sale.pk %}"
+                                            class="action-btn"
+                                            title="View Receipt"
+                                        >
+                                            <span class="material-symbols-outlined">
+                                                receipt_long
+                                            </span>
+                                        </a>
+
+
+                                        <a
+                                            href="{% url 'sales:sale_return' sale.pk %}"
+                                            class="action-btn"
+                                            title="Process Return"
+                                        >
+                                            <span class="material-symbols-outlined">
+                                                assignment_return
+                                            </span>
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="10"
+                                    style="
+                                        text-align:center;
+                                        padding:55px 20px;
+                                    "
+                                >
+
+                                    <span
+                                        class="material-symbols-outlined"
+                                        style="
+                                            font-size:44px;
+                                            color:#98a2b3;
+                                        "
+                                    >
+                                        shopping_cart
+                                    </span>
+
+
+                                    <div
+                                        style="
+                                            margin-top:10px;
+                                            font-size:15px;
+                                            font-weight:600;
+                                        "
+                                    >
+
+                                        {% if search_query %}
+                                            No matching sales found
+                                        {% else %}
+                                            No sales created yet
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <div
+                                        style="
+                                            margin-top:5px;
+                                            color:#98a2b3;
+                                            font-size:12px;
+                                        "
+                                    >
+
+                                        {% if search_query %}
+
+                                            Try searching with another
+                                            customer name or sale ID.
+
+                                        {% else %}
+
+                                            Create your first sale to see
+                                            it listed here.
+
+                                        {% endif %}
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="card-footer">
+
+                    <span>
+                        Showing
+                        {{ page_obj.start_index }}
+                        -
+                        {{ page_obj.end_index }}
+                        of
+                        {{ page_obj.paginator.count }}
+                        sale{{ page_obj.paginator.count|pluralize }}
+                    </span>
+
+
+                    <div class="action-group">
+
+                        {% if page_obj.has_previous %}
+
+                            <a
+                                href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                                class="action-btn"
+                                title="Previous Page"
+                            >
+                                <span class="material-symbols-outlined">
+                                    chevron_left
+                                </span>
+                            </a>
+
+                        {% endif %}
+
+
+                        <span
+                            style="
+                                display:flex;
+                                align-items:center;
+                                padding:0 8px;
+                                color:#667085;
+                                font-size:12px;
+                            "
+                        >
+                            Page
+                            {{ page_obj.number }}
+                            of
+                            {{ page_obj.paginator.num_pages }}
+                        </span>
+
+
+                        {% if page_obj.has_next %}
+
+                            <a
+                                href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                                class="action-btn"
+                                title="Next Page"
+                            >
+                                <span class="material-symbols-outlined">
+                                    chevron_right
+                                </span>
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
 
 </body>
-
 </html>

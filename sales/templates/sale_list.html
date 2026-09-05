@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Sales - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Sales Directory</h1>
+            <p class="text-sm text-gray-400 mt-0.5">All recorded sales and their payment status.</p>
+        </div>
+        <a href="{% url 'sales:sale_create' %}"
+           class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Sale
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-gray-100">
+            <form method="get" class="flex gap-2">
+                <div class="relative flex-1 max-w-sm">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" name="search" value="{{ search_query }}"
+                           placeholder="Search by customer name or sale ID..."
+                           class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400">
+                </div>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Search</button>
+            </form>
+        </div>
+
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-gray-400 uppercase text-[11px] tracking-wide">
+                    <th class="text-left font-semibold px-5 py-3">Sale ID</th>
+                    <th class="text-left font-semibold px-3 py-3">Customer</th>
+                    <th class="text-left font-semibold px-3 py-3">Payment Type</th>
+                    <th class="text-left font-semibold px-3 py-3">Total</th>
+                    <th class="text-left font-semibold px-3 py-3">Date</th>
+                    <th class="text-right font-semibold px-5 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in page_obj %}
+                <tr class="border-t border-gray-50 hover:bg-gray-50/60">
+                    <td class="px-5 py-3 font-medium text-gray-800">#{{ sale.id }}</td>
+                    <td class="px-3 py-3 text-gray-500">{{ sale.customer.full_name }}</td>
+                    <td class="px-3 py-3">
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-600">
+                            {{ sale.get_payment_type_display|default:sale.payment_type }}
+                        </span>
+                    </td>
+                    <td class="px-3 py-3 font-semibold text-gray-800">${{ sale.total_amount }}</td>
+                    <td class="px-3 py-3 text-gray-500">{{ sale.created_at|date:"M d, Y" }}</td>
+                    <td class="px-5 py-3 text-right">
+                        <div class="inline-flex gap-3 justify-end">
+                            <a href="{% url 'sales:sale_detail' sale.pk %}" class="text-blue-600 hover:text-blue-700 text-xs font-semibold">View</a>
+                            <a href="{% url 'sales:sale_return' sale.pk %}" class="text-amber-600 hover:text-amber-700 text-xs font-semibold">Return</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-5 py-10 text-center text-gray-400">No sales records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if page_obj.has_other_pages %}
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-xs text-gray-400">
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">Previous</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

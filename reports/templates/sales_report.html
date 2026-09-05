@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Sales Report - QIST Management{% endblock %}
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+<nav class="flex text-xs text-gray-400 mb-2"><a href="{% url 'reports:reports_home' %}" class="hover:text-blue-600">Reports</a><span class="mx-1.5">›</span><span class="text-gray-600">Sales Report</span></nav>
+<h1 class="text-xl font-bold text-gray-900 mb-6">Sales Report</h1>
+
+<form method="get" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-wrap items-end gap-3 mb-5">
+  <div><label class="block text-xs font-medium text-gray-600 mb-1">From</label><input type="date" name="start" value="{{ start|date:'Y-m-d' }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+  <div><label class="block text-xs font-medium text-gray-600 mb-1">To</label><input type="date" name="end" value="{{ end|date:'Y-m-d' }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+  <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700">Apply</button>
+</form>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4"><p class="text-[11px] font-semibold text-gray-400 uppercase">Sales</p><p class="text-xl font-bold text-gray-900 mt-1">{{ totals.count|default:0 }}</p></div>
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4"><p class="text-[11px] font-semibold text-gray-400 uppercase">Subtotal</p><p class="text-xl font-bold text-gray-900 mt-1">${{ totals.subtotal|default:0|floatformat:2 }}</p></div>
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4"><p class="text-[11px] font-semibold text-gray-400 uppercase">Discounts</p><p class="text-xl font-bold text-rose-600 mt-1">${{ totals.discount|default:0|floatformat:2 }}</p></div>
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4"><p class="text-[11px] font-semibold text-gray-400 uppercase">Total Revenue</p><p class="text-xl font-bold text-blue-700 mt-1">${{ totals.total|default:0|floatformat:2 }}</p></div>
+</div>
+
+{% if by_status %}
+<div class="flex flex-wrap gap-2 mb-5">
+  {% for row in by_status %}
+  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 text-gray-700 text-xs font-medium">
+    {{ row.status|title }}: {{ row.count }} sale{{ row.count|pluralize }} · ${{ row.total|floatformat:2 }}
+  </span>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+  <table class="w-full text-left min-w-[760px]">
+    <thead><tr class="bg-gray-50 border-b border-gray-100">
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4">Sale</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4">Customer</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4 text-right">Subtotal</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4 text-right">Discount</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4 text-right">Tax</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4 text-right">Total</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4">Status</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4">Date</th>
+    </tr></thead>
+    <tbody class="divide-y divide-gray-50">
+      {% for sale in sales %}
+      <tr class="hover:bg-gray-50">
+        <td class="py-2.5 px-4 text-sm font-medium text-blue-600">Sale #{{ sale.pk }}</td>
+        <td class="py-2.5 px-4 text-sm font-semibold text-gray-800">{{ sale.customer.full_name }}</td>
+        <td class="py-2.5 px-4 text-sm text-gray-600 text-right">${{ sale.subtotal }}</td>
+        <td class="py-2.5 px-4 text-sm text-gray-600 text-right">${{ sale.discount }}</td>
+        <td class="py-2.5 px-4 text-sm text-gray-600 text-right">${{ sale.tax }}</td>
+        <td class="py-2.5 px-4 text-sm font-semibold text-gray-800 text-right">${{ sale.total_amount }}</td>
+        <td class="py-2.5 px-4"><span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold {% if sale.status == 'COMPLETED' %}bg-emerald-50 text-emerald-700{% elif sale.status == 'CANCELLED' %}bg-rose-50 text-rose-700{% else %}bg-blue-50 text-blue-700{% endif %}">{{ sale.status|title }}</span></td>
+        <td class="py-2.5 px-4 text-sm text-gray-500">{{ sale.created_at|date:"M j, Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" class="py-10 px-4 text-center text-sm text-gray-400">No sales in this date range.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div>
+{% endblock %}

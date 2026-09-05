@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Sale #{{ sale.id }} - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+    <div class="mb-4">
+        <a href="{% url 'sales:sale_list' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Sales
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-4">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-lg font-bold text-gray-900">Sale #{{ sale.id }}</h1>
+            <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-600">{{ sale.status }}</span>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase">Customer</p>
+                <p class="text-sm font-bold text-gray-900 mt-1">{{ sale.customer.full_name }}</p>
+                <p class="text-xs text-gray-400">{{ sale.customer.phone }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase">Payment Type</p>
+                <p class="text-sm font-bold text-gray-900 mt-1">{{ sale.payment_type }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase">Discount / Tax</p>
+                <p class="text-sm font-bold text-gray-900 mt-1">${{ sale.discount }} / ${{ sale.tax }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase">Total Amount</p>
+                <p class="text-sm font-bold text-blue-600 mt-1">${{ sale.total_amount }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-800">Items Purchased</h3>
+        </div>
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-gray-400 uppercase text-[11px] tracking-wide">
+                    <th class="text-left font-semibold px-5 py-3">Product</th>
+                    <th class="text-left font-semibold px-3 py-3">Quantity</th>
+                    <th class="text-left font-semibold px-3 py-3">Unit Price</th>
+                    <th class="text-right font-semibold px-5 py-3">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr class="border-t border-gray-50">
+                    <td class="px-5 py-3 font-medium text-gray-800">{{ item.product.name }}</td>
+                    <td class="px-3 py-3 text-gray-500">{{ item.quantity }}</td>
+                    <td class="px-3 py-3 text-gray-500">${{ item.unit_price }}</td>
+                    <td class="px-5 py-3 text-right font-semibold text-gray-800">${{ item.total }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="px-5 py-8 text-center text-gray-400">No items attached to this sale.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flex gap-3">
+        <a href="{% url 'sales:sale_return' sale.pk %}"
+           class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="undo-2" class="w-4 h-4"></i> Process Return
+        </a>
+    </div>
+</div>
+{% endblock %}

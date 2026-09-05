@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - QIST ERP{% endblock %}
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Welcome, {{ request.user.username }}</h1>
+      <p class="text-sm text-gray-400 mt-0.5">Here's what's happening today</p>
+    </div>
+    <a href="{% url 'sales:sale_create' %}" class="bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-800 transition-colors flex items-center gap-2">
+      <i data-lucide="plus" class="w-4 h-4"></i> New Sale
+    </a>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+      <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+        <i data-lucide="shopping-cart" class="w-[18px] h-[18px]"></i>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Sales Today</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">${{ sales_today_total|floatformat:0 }}</p>
+      <p class="text-xs text-gray-400 mt-0.5">{{ sales_today_count }} sale{{ sales_today_count|pluralize }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+      <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+        <i data-lucide="wallet" class="w-[18px] h-[18px]"></i>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Collected Today</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">${{ collected_today|floatformat:0 }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+      <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
+        <i data-lucide="calendar-clock" class="w-[18px] h-[18px]"></i>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Due This Week</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">${{ due_this_week|floatformat:0 }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+      <div class="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
+        <i data-lucide="alert-triangle" class="w-[18px] h-[18px]"></i>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Overdue Payments</p>
+      <p class="text-xl font-bold text-rose-600 mt-1">{{ overdue_count }}</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+    <!-- Recent Sales -->
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-800">Recent Sales</h3>
+        <a href="{% url 'sales:sale_list' %}" class="text-xs font-semibold text-blue-600 hover:underline">View All</a>
+      </div>
+      <table class="w-full text-left">
+        <thead><tr class="border-b border-gray-100">
+          <th class="text-[11px] font-semibold text-gray-400 uppercase py-2.5 px-5">Sale</th>
+          <th class="text-[11px] font-semibold text-gray-400 uppercase py-2.5 px-5">Customer</th>
+          <th class="text-[11px] font-semibold text-gray-400 uppercase py-2.5 px-5 text-right">Amount</th>
+        </tr></thead>
+        <tbody>
+          {% for sale in recent_sales %}
+          <tr class="border-b border-gray-50 hover:bg-gray-50">
+            <td class="py-2.5 px-5 text-sm font-medium text-blue-600"><a href="{% url 'sales:sale_detail' sale.pk %}">Sale #{{ sale.pk }}</a></td>
+            <td class="py-2.5 px-5 text-sm text-gray-700">{{ sale.customer.full_name }}</td>
+            <td class="py-2.5 px-5 text-sm font-semibold text-gray-800 text-right">${{ sale.total_amount }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="py-8 px-5 text-center text-sm text-gray-400">No sales yet today.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Upcoming Payments -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <h3 class="text-sm font-semibold text-gray-800 mb-4">Upcoming Payments</h3>
+      <div class="space-y-3">
+        {% for payment in upcoming_payments %}
+        <a href="{% url 'installments:plan_detail' payment.plan_id %}" class="flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 transition-colors">
+          <div>
+            <p class="text-sm font-medium text-gray-800">{{ payment.plan.sale.customer.full_name }}</p>
+            <p class="text-xs text-gray-400">Due {{ payment.due_date|date:"M j, Y" }}</p>
+          </div>
+          <span class="text-sm font-semibold text-gray-900">${{ payment.amount_due }}</span>
+        </a>
+        {% empty %}
+        <p class="text-sm text-gray-400 text-center py-6">No upcoming payments.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <a href="{% url 'customers:customer_list' %}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:border-blue-300 transition-colors">
+      <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="users" class="w-[18px] h-[18px]"></i></div>
+      <span class="text-sm font-semibold text-gray-800">Customers</span>
+    </a>
+    <a href="{% url 'installments:plan_list' %}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:border-blue-300 transition-colors">
+      <div class="w-9 h-9 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center"><i data-lucide="credit-card" class="w-[18px] h-[18px]"></i></div>
+      <span class="text-sm font-semibold text-gray-800">Installments</span>
+    </a>
+    <a href="{% url 'products:product_list' %}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:border-blue-300 transition-colors">
+      <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="package" class="w-[18px] h-[18px]"></i></div>
+      <span class="text-sm font-semibold text-gray-800">Products</span>
+    </a>
+    <a href="{% url 'sales:sale_return_list' %}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:border-blue-300 transition-colors">
+      <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="undo-2" class="w-[18px] h-[18px]"></i></div>
+      <span class="text-sm font-semibold text-gray-800">Returns</span>
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Plan Details - Sale #{{ plan.sale.id }} - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+    <div class="mb-4">
+        <a href="{% url 'installments:plan_list' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Installments
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-4">
+        <h1 class="text-lg font-bold text-gray-900 mb-1">Installment Plan Overview</h1>
+        <p class="text-sm text-gray-400 mb-4">{{ plan.sale.customer.full_name }}</p>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase">Total Sale</p>
+                <p class="text-base font-bold text-gray-900 mt-1">${{ plan.total_amount }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase">Down Payment</p>
+                <p class="text-base font-bold text-gray-900 mt-1">${{ plan.down_payment }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase">Remaining</p>
+                <p class="text-base font-bold text-rose-600 mt-1">${{ plan.remaining_balance }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-[11px] font-semibold text-gray-400 uppercase">Status</p>
+                <p class="text-base font-bold text-gray-900 mt-1">{{ plan.status }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-800">Payment Schedule</h3>
+        </div>
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-gray-400 uppercase text-[11px] tracking-wide">
+                    <th class="text-left font-semibold px-5 py-3">#</th>
+                    <th class="text-left font-semibold px-3 py-3">Due Date</th>
+                    <th class="text-left font-semibold px-3 py-3">Amount</th>
+                    <th class="text-left font-semibold px-3 py-3">Status</th>
+                    <th class="text-left font-semibold px-3 py-3">Paid Date</th>
+                    <th class="text-right font-semibold px-5 py-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr class="border-t border-gray-50">
+                    <td class="px-5 py-3 font-medium text-gray-800">{{ payment.installment_number }}</td>
+                    <td class="px-3 py-3 text-gray-500">{{ payment.due_date|date:"M d, Y" }}</td>
+                    <td class="px-3 py-3 font-semibold text-gray-800">${{ payment.amount_due }}</td>
+                    <td class="px-3 py-3">
+                        {% if payment.status == 'PAID' %}
+                            <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-600">PAID</span>
+                        {% else %}
+                            <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-600">PENDING</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-3 py-3 text-gray-500">{{ payment.paid_date|date:"M d, Y"|default:"—" }}</td>
+                    <td class="px-5 py-3 text-right">
+                        {% if payment.status == 'PENDING' %}
+                            <a href="{% url 'installments:record_payment' payment.pk %}"
+                               class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">
+                                Mark Paid
+                            </a>
+                        {% else %}
+                            <span class="text-xs text-gray-400">Settled</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

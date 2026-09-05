@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Create Installment Plan - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full flex items-start justify-center">
+    <div class="w-full max-w-md">
+        <div class="mb-4">
+            <a href="{% url 'sales:sale_detail' sale.pk %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Sale #{{ sale.id }}
+            </a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h1 class="text-lg font-bold text-gray-900 mb-1">Setup Installment Plan</h1>
+            <p class="text-sm text-gray-400 mb-5">{{ sale.customer.full_name }} &middot; Sale Total ${{ sale.total_amount }}</p>
+
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Duration (Months)</label>
+                    {{ form.number_of_months }}
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Down Payment ($)</label>
+                    {{ form.down_payment }}
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors mt-2">Generate Schedule</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    input[type="number"], input[type="text"] {
+        width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.5rem;
+        font-size: 0.875rem; outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+</style>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Create Sale - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+    <div class="mb-4">
+        <a href="{% url 'sales:sale_list' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Sales
+        </a>
+    </div>
+
+    <div class="max-w-3xl">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h1 class="text-lg font-bold text-gray-900 mb-5">Create New Sale</h1>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 px-3 py-2 rounded-lg bg-rose-50 text-rose-600 text-xs font-medium border border-rose-100">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% if form.errors or formset.errors %}
+                <div class="mb-4 px-3 py-2 rounded-lg bg-rose-50 text-rose-600 text-xs font-medium border border-rose-100">
+                    Please check the highlighted fields below.
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="grid grid-cols-2 gap-4 mb-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Customer</label>
+                        {{ form.customer }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Payment Type</label>
+                        {{ form.payment_type }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Overall Discount ($)</label>
+                        {{ form.discount }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Overall Tax ($)</label>
+                        {{ form.tax }}
+                    </div>
+                </div>
+
+                <h3 class="text-sm font-semibold text-gray-800 mb-3">Select Products</h3>
+                {{ formset.management_form }}
+                <div class="border border-gray-100 rounded-xl overflow-hidden mb-3">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-gray-400 uppercase text-[11px] tracking-wide bg-gray-50">
+                                <th class="text-left font-semibold px-4 py-2.5">Product</th>
+                                <th class="text-left font-semibold px-3 py-2.5">Qty</th>
+                                <th class="text-left font-semibold px-3 py-2.5">Discount</th>
+                                <th class="text-left font-semibold px-3 py-2.5">Tax</th>
+                                <th class="text-left font-semibold px-3 py-2.5 w-10"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="sale-items-body">
+                            {% for item_form in formset %}
+                            <tr class="border-t border-gray-50 sale-item-row">
+                                <td class="px-4 py-2.5">{{ item_form.id }}{{ item_form.product }}</td>
+                                <td class="px-3 py-2.5">{{ item_form.quantity }}</td>
+                                <td class="px-3 py-2.5">{{ item_form.discount }}</td>
+                                <td class="px-3 py-2.5">{{ item_form.tax }}</td>
+                                <td class="px-3 py-2.5 text-center">
+                                    <label class="hidden">{{ item_form.DELETE }}</label>
+                                    <button type="button" class="remove-row-btn text-gray-300 hover:text-rose-600 transition-colors" title="Remove">
+                                        <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <button type="button" id="add-item-btn" class="mb-5 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Product
+                </button>
+
+                <!-- Hidden template row used to stamp out new formset rows -->
+                <table class="hidden"><tbody id="empty-form-template">
+                    <tr class="sale-item-row">
+                        <td class="px-4 py-2.5">{{ formset.empty_form.id }}{{ formset.empty_form.product }}</td>
+                        <td class="px-3 py-2.5">{{ formset.empty_form.quantity }}</td>
+                        <td class="px-3 py-2.5">{{ formset.empty_form.discount }}</td>
+                        <td class="px-3 py-2.5">{{ formset.empty_form.tax }}</td>
+                        <td class="px-3 py-2.5 text-center">
+                            <label class="hidden">{{ formset.empty_form.DELETE }}</label>
+                            <button type="button" class="remove-row-btn text-gray-300 hover:text-rose-600 transition-colors" title="Remove">
+                                <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody></table>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">Process Sale</button>
+                    <a href="{% url 'sales:sale_list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    select, input[type="text"], input[type="number"] {
+        width: 100%; padding: 0.5rem 0.65rem; border: 1px solid #e5e7eb; border-radius: 0.5rem;
+        font-size: 0.8125rem; outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    select:focus, input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const totalFormsInput = document.getElementById("id_items-TOTAL_FORMS");
+    const body = document.getElementById("sale-items-body");
+    const template = document.getElementById("empty-form-template").querySelector(".sale-item-row");
+    const addBtn = document.getElementById("add-item-btn");
+
+    function refreshIcons() {
+        if (window.lucide) { window.lucide.createIcons(); }
+    }
+
+    function wireRemove(row) {
+        const btn = row.querySelector(".remove-row-btn");
+        btn.addEventListener("click", function () {
+            const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteCheckbox) {
+                // Existing row tied to a saved SaleItem: mark for deletion, hide instead of removing from DOM
+                deleteCheckbox.checked = true;
+                row.style.display = "none";
+            } else {
+                // Newly added row with no server-side counterpart yet: just remove it
+                row.remove();
+            }
+        });
+    }
+
+    body.querySelectorAll(".sale-item-row").forEach(wireRemove);
+
+    addBtn.addEventListener("click", function () {
+        const index = parseInt(totalFormsInput.value, 10);
+        const newRow = template.cloneNode(true);
+        newRow.innerHTML = newRow.innerHTML.replaceAll("__prefix__", index);
+        body.appendChild(newRow);
+        wireRemove(newRow);
+        totalFormsInput.value = index + 1;
+        refreshIcons();
+    });
+});
+</script>
+{% endblock %}

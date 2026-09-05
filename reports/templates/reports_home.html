@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Reports - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Reports</h1>
+        <p class="text-sm text-gray-400 mt-0.5">Business reports across sales, installments, and collections.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a href="{% url 'reports:sales_report' %}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-blue-300 hover:shadow-md transition-all flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"><i data-lucide="shopping-cart" class="w-5 h-5"></i></div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Sales Report</h3>
+                <p class="text-xs text-gray-400 mt-1">Totals, discounts, and tax across sales in a date range.</p>
+            </div>
+        </a>
+        <a href="{% url 'reports:installment_report' %}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-blue-300 hover:shadow-md transition-all flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0"><i data-lucide="calendar-clock" class="w-5 h-5"></i></div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Installment Report</h3>
+                <p class="text-xs text-gray-400 mt-1">Scheduled installments due in a date range, by status.</p>
+            </div>
+        </a>
+        <a href="{% url 'reports:outstanding_report' %}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-blue-300 hover:shadow-md transition-all flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0"><i data-lucide="landmark" class="w-5 h-5"></i></div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Outstanding Balance Report</h3>
+                <p class="text-xs text-gray-400 mt-1">Remaining balance owed per customer, highest first.</p>
+            </div>
+        </a>
+        <a href="{% url 'reports:collection_report' %}" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-blue-300 hover:shadow-md transition-all flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"><i data-lucide="wallet" class="w-5 h-5"></i></div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Collection Report</h3>
+                <p class="text-xs text-gray-400 mt-1">Payments collected in a date range, by method.</p>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+<aside class="w-64 bg-white text-gray-600 flex flex-col justify-between h-screen border-r border-gray-200 select-none">
+
+  <!-- Top Section: Brand & Navigation -->
+  <div class="flex-1 overflow-y-auto">
+    <!-- Logo Header -->
+    <div class="px-5 py-5 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-200">
+        <i data-lucide="layout-grid" class="w-5 h-5"></i>
+      </div>
+      <div>
+        <h1 class="text-gray-900 font-bold text-sm leading-tight">QIST ERP</h1>
+        <p class="text-xs text-gray-400">Installment Sales</p>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="px-3 py-2 space-y-1">
+
+      <!-- Dashboard -->
+      <a href="{% url 'dashboards:admin_dashboard' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 {% if request.resolver_match.app_name == 'dashboards' %}bg-blue-50 text-blue-600{% else %}text-gray-500 hover:text-gray-800 hover:bg-gray-50{% endif %}">
+        <i data-lucide="layout-dashboard" class="w-[18px] h-[18px]"></i>
+        <span>Dashboard</span>
+      </a>
+
+      <!-- Customers -->
+      <a href="{% url 'customers:customer_list' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 {% if request.resolver_match.app_name == 'customers' %}bg-blue-50 text-blue-600{% else %}text-gray-500 hover:text-gray-800 hover:bg-gray-50{% endif %}">
+        <i data-lucide="users" class="w-[18px] h-[18px]"></i>
+        <span>Customers</span>
+      </a>
+
+      <!-- Products -->
+      <a href="{% url 'products:product_list' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 {% if request.resolver_match.app_name == 'products' %}bg-blue-50 text-blue-600{% else %}text-gray-500 hover:text-gray-800 hover:bg-gray-50{% endif %}">
+        <i data-lucide="package" class="w-[18px] h-[18px]"></i>
+        <span>Products</span>
+      </a>
+
+      <!-- Sales -->
+      <a href="{% url 'sales:sale_list' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 {% if request.resolver_match.app_name == 'sales' %}bg-blue-50 text-blue-600{% else %}text-gray-500 hover:text-gray-800 hover:bg-gray-50{% endif %}">
+        <i data-lucide="shopping-cart" class="w-[18px] h-[18px]"></i>
+        <span>Sales</span>
+      </a>
+
+      <!-- Sales Returns -->
+      <a href="{% url 'sales:sale_return_list' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 {% if request.resolver_match.url_name == 'sale_return_list' or request.resolver_match.url_name == 'sale_return_detail' %}bg-blue-50 text-blue-600{% else %}text-gray-500 hover:text-gray-800 hover:bg-gray-50{% endif %}">
+        <i data-lucide="undo-2" class="w-[18px] h-[18px]"></i>
+        <span>Returns</span>
+      </a>
+
+      <!-- Installments -->
+      <a href="{% url 'installments:plan_list' %}"
+         class="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 {% if request.resolver_match.app_name == 'installments' %}bg-blue-50 text-blue-600{% else %}text-gray-500 hover:text-gray-800 hover:bg-gray-50{% endif %}">
+        <div class="flex items-center gap-3">
+          <i data-lucide="credit-card" class="w-[18px] h-[18px]"></i>
+          <span>Installments</span>
+        </div>
+      </a>
+
+      <!-- Reports -->
+      <a href="{% url 'reports:reports_home' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 {% if request.resolver_match.app_name == 'reports' %}bg-blue-50 text-blue-600{% else %}text-gray-500 hover:text-gray-800 hover:bg-gray-50{% endif %}">
+        <i data-lucide="bar-chart-3" class="w-[18px] h-[18px]"></i>
+        <span>Reports</span>
+      </a>
+
+      {% if request.user.profile.role == 'ADMIN' %}
+      <!-- Users -->
+      <a href="{% url 'users:user_list' %}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 {% if request.resolver_match.app_name == 'users' %}bg-blue-50 text-blue-600{% else %}text-gray-500 hover:text-gray-800 hover:bg-gray-50{% endif %}">
+        <i data-lucide="shield-check" class="w-[18px] h-[18px]"></i>
+        <span>Users</span>
+      </a>
+      {% endif %}
+
+    </nav>
+  </div>
+
+  <!-- Bottom Section: User Profile & Actions -->
+  <div class="p-3 border-t border-gray-100">
+    <div class="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+          {{ user.username|slice:":2"|upper|default:"AD" }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-semibold text-gray-800 truncate">{{ user.get_full_name|default:user.username }}</p>
+          <p class="text-[10px] text-gray-400 truncate">{{ user.profile.get_role_display|default:"Administrator" }}</p>
+        </div>
+      </div>
+
+      <!-- Logout Button -->
+      <a href="{% url 'users:logout' %}" class="text-gray-400 hover:text-gray-700 transition-colors p-1" title="Logout">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+      </a>
+    </div>
+  </div>
+
+</aside>

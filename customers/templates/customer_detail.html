@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ customer.full_name }} - QIST Management{% endblock %}
+
+{% block content %}
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+  <div class="flex items-center gap-3">
+    <h1 class="text-2xl font-bold text-slate-900">{{ customer.full_name }}</h1>
+    <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">CUST-{{ customer.id|stringformat:"03d" }}</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <a href="{% url 'customers:customer_update' customer.pk %}" class="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">edit</span> Edit
+    </a>
+    <a href="{% url 'sales:sale_create' %}" class="px-3.5 py-2 rounded-lg bg-blue-700 text-white text-sm font-semibold hover:bg-blue-800 transition-colors flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">shopping_cart</span> New Sale
+    </a>
+    {% if next_unpaid_installment %}
+    <a href="{% url 'installments:record_payment' next_unpaid_installment.pk %}" class="px-3.5 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">payments</span> Record Payment
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Total Purchases</p>
+    <p class="text-lg font-bold text-slate-900 mt-1">${{ total_purchases|floatformat:2 }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Total Paid</p>
+    <p class="text-lg font-bold text-emerald-600 mt-1">${{ total_paid|floatformat:2 }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Outstanding</p>
+    <p class="text-lg font-bold text-slate-900 mt-1">${{ outstanding|floatformat:2 }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Overdue</p>
+    <p class="text-lg font-bold {% if overdue %}text-rose-600{% else %}text-slate-900{% endif %} mt-1">${{ overdue|floatformat:2 }}</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="lg:col-span-1 flex flex-col gap-5">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <h3 class="text-sm font-semibold text-slate-900 mb-3">Customer Info</h3>
+      <div class="space-y-2.5 text-sm">
+        <p class="text-slate-700"><span class="text-slate-400">Phone: </span>{{ customer.phone }}</p>
+        <p class="text-slate-700"><span class="text-slate-400">Email: </span>{{ customer.email|default:"—" }}</p>
+        <p class="text-slate-700"><span class="text-slate-400">Address: </span>{{ customer.address|default:"—" }}</p>
+      </div>
+    </div>
+    {% if upcoming_installment %}
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+      <h3 class="text-sm font-semibold text-amber-800 mb-2">Upcoming Installment</h3>
+      <p class="text-lg font-bold text-amber-900">${{ upcoming_installment.amount_due|floatformat:2 }}</p>
+      <p class="text-xs text-amber-700 mt-1">Due {{ upcoming_installment.due_date|date:"M j, Y" }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="lg:col-span-2">
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+        <h3 class="text-sm font-semibold text-slate-900">Recent Sales</h3>
+        <a href="{% url 'sales:sale_list' %}" class="text-xs font-semibold text-indigo-600 hover:underline">View All</a>
+      </div>
+      <table class="w-full text-left">
+        <thead><tr class="border-b border-slate-100">
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4">Sale</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4">Date</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4 text-right">Amount</th>
+          <th class="text-[11px] font-semibold text-slate-400 uppercase py-2 px-4">Status</th>
+        </tr></thead>
+        <tbody>
+          {% for sale in sales %}
+          <tr class="border-b border-slate-50 hover:bg-slate-50">
+            <td class="py-2.5 px-4 text-sm font-medium text-indigo-600">
+              {% if sale.installment_plan %}<a href="{% url 'installments:plan_detail' sale.installment_plan.pk %}">Sale #{{ sale.pk }}</a>{% else %}<a href="{% url 'sales:sale_detail' sale.pk %}">Sale #{{ sale.pk }}</a>{% endif %}
+            </td>
+            <td class="py-2.5 px-4 text-sm text-slate-600">{{ sale.created_at|date:"M j, Y" }}</td>
+            <td class="py-2.5 px-4 text-sm font-semibold text-slate-800 text-right">${{ sale.total_amount }}</td>
+            <td class="py-2.5 px-4">
+              <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold
+                {% if sale.status == 'COMPLETED' %}bg-emerald-50 text-emerald-700
+                {% elif sale.status == 'CANCELLED' %}bg-rose-50 text-rose-700
+                {% else %}bg-blue-50 text-blue-700{% endif %}">
+                {{ sale.status|title }}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="py-6 px-4 text-center text-sm text-slate-400">No sales yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

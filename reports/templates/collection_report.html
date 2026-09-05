@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Collection Report - QIST Management{% endblock %}
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+<nav class="flex text-xs text-gray-400 mb-2"><a href="{% url 'reports:reports_home' %}" class="hover:text-blue-600">Reports</a><span class="mx-1.5">›</span><span class="text-gray-600">Collection Report</span></nav>
+<h1 class="text-xl font-bold text-gray-900 mb-6">Collection Report</h1>
+
+<form method="get" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-wrap items-end gap-3 mb-5">
+  <div><label class="block text-xs font-medium text-gray-600 mb-1">From</label><input type="date" name="start" value="{{ start|date:'Y-m-d' }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+  <div><label class="block text-xs font-medium text-gray-600 mb-1">To</label><input type="date" name="end" value="{{ end|date:'Y-m-d' }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm"></div>
+  <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700">Apply</button>
+</form>
+
+<div class="grid grid-cols-2 gap-4 mb-5 max-w-md">
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4"><p class="text-[11px] font-semibold text-gray-400 uppercase">Payments</p><p class="text-xl font-bold text-gray-900 mt-1">{{ totals.count|default:0 }}</p></div>
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4"><p class="text-[11px] font-semibold text-gray-400 uppercase">Total Collected</p><p class="text-xl font-bold text-emerald-600 mt-1">${{ totals.total|default:0|floatformat:2 }}</p></div>
+</div>
+
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+  <table class="w-full text-left min-w-[700px]">
+    <thead><tr class="bg-gray-50 border-b border-gray-100">
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4">Plan</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4">Customer</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4">Installment</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4 text-right">Amount</th>
+      <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-4">Paid On</th>
+    </tr></thead>
+    <tbody class="divide-y divide-gray-50">
+      {% for payment in payments %}
+      <tr class="hover:bg-gray-50">
+        <td class="py-2.5 px-4 text-sm font-medium text-blue-600"><a href="{% url 'installments:plan_detail' payment.plan_id %}">INS-{{ payment.plan_id|stringformat:"03d" }}</a></td>
+        <td class="py-2.5 px-4 text-sm font-semibold text-gray-800">{{ payment.plan.sale.customer.full_name }}</td>
+        <td class="py-2.5 px-4 text-sm text-gray-500">#{{ payment.installment_number }}</td>
+        <td class="py-2.5 px-4 text-sm font-semibold text-emerald-600 text-right">${{ payment.amount_due }}</td>
+        <td class="py-2.5 px-4 text-sm text-gray-500">{{ payment.paid_date|date:"M j, Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="py-10 px-4 text-center text-sm text-gray-400">No payments collected in this date range.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div>
+{% endblock %}

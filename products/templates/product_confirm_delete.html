@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delete Product | QIST Management{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/products.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content delete-page">
+    <div class="delete-card">
+        <div class="delete-icon">
+            <span class="material-symbols-outlined">delete</span>
+        </div>
+        <h1>Delete Product</h1>
+        <p class="delete-warning">Are you sure you want to delete <strong>"{{ object.name }}"</strong>? This action cannot be undone.</p>
+
+        <div class="delete-object-info">
+            <div class="delete-info-row">
+                <span>SKU / ID</span>
+                <strong>#{{ object.sku|default:object.id }}</strong>
+            </div>
+            <div class="delete-info-row">
+                <span>Category</span>
+                <strong>{{ object.category.name|default:"Uncategorized" }}</strong>
+            </div>
+            <div class="delete-info-row">
+                <span>Current Price</span>
+                <strong>${{ object.price }}</strong>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="delete-actions">
+                <a href="{% url 'products:product_list' %}" class="secondary-btn">Cancel</a>
+                <button type="submit" class="danger-btn">Confirm Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

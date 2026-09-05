@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Customers - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Customers</h1>
+            <p class="text-sm text-gray-400 mt-0.5">Manage customer profiles and contact information.</p>
+        </div>
+        <a href="{% url 'customers:customer_create' %}"
+           class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add Customer
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-gray-100">
+            <form method="get" class="flex gap-2">
+                <div class="relative flex-1 max-w-sm">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" name="search" value="{{ search_query }}"
+                           placeholder="Search by name, phone, or email..."
+                           class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400">
+                </div>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Search</button>
+            </form>
+        </div>
+
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-gray-400 uppercase text-[11px] tracking-wide">
+                    <th class="text-left font-semibold px-5 py-3">Full Name</th>
+                    <th class="text-left font-semibold px-3 py-3">Phone</th>
+                    <th class="text-left font-semibold px-3 py-3">Email</th>
+                    <th class="text-left font-semibold px-3 py-3">Address</th>
+                    <th class="text-right font-semibold px-5 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in page_obj %}
+                <tr class="border-t border-gray-50 hover:bg-gray-50/60">
+                    <td class="px-5 py-3 font-medium text-gray-800"><a href="{% url 'customers:customer_detail' customer.pk %}" class="hover:text-indigo-600">{{ customer.full_name }}</a></td>
+                    <td class="px-3 py-3 text-gray-500">{{ customer.phone }}</td>
+                    <td class="px-3 py-3 text-gray-500">{{ customer.email|default:"—" }}</td>
+                    <td class="px-3 py-3 text-gray-500">{{ customer.address|default:"—" }}</td>
+                    <td class="px-5 py-3 text-right">
+                        <div class="inline-flex gap-2 justify-end">
+                            <a href="{% url 'customers:customer_update' customer.pk %}"
+                               class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50" title="Edit">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </a>
+                            <a href="{% url 'customers:customer_delete' customer.pk %}"
+                               class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-5 py-10 text-center text-gray-400">No customers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if page_obj.has_other_pages %}
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-xs text-gray-400">
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            <div class="flex gap-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}" class="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">Previous</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}" class="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

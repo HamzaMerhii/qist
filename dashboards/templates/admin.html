@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+      <p class="text-sm text-gray-400 mt-0.5">Overview of your business activity</p>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+      <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+        <i data-lucide="trending-up" class="w-[18px] h-[18px]"></i>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Total Sales</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">${{ total_sales|floatformat:0 }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+      <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+        <i data-lucide="wallet" class="w-[18px] h-[18px]"></i>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Total Collected</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">${{ total_collected|floatformat:0 }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+      <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
+        <i data-lucide="calendar-clock" class="w-[18px] h-[18px]"></i>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Outstanding Balance</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">${{ outstanding_balance|floatformat:0 }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+      <div class="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
+        <i data-lucide="alert-triangle" class="w-[18px] h-[18px]"></i>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Overdue Amount</p>
+      <p class="text-xl font-bold text-rose-600 mt-1">${{ overdue_amount|floatformat:0 }}</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+      <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+        <i data-lucide="file-text" class="w-[18px] h-[18px]"></i>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Active Plans</p>
+      <p class="text-xl font-bold text-gray-900 mt-1">{{ active_plans }}</p>
+    </div>
+  </div>
+
+  <!-- Chart + Recent Activity -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+      <h3 class="text-sm font-semibold text-gray-800 mb-4">Sales Overview</h3>
+      <canvas id="salesChart" height="90"></canvas>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+      <h3 class="text-sm font-semibold text-gray-800 mb-4">Recent Sales</h3>
+      <div class="space-y-4">
+        {% for sale in recent_sales %}
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="receipt" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-medium text-gray-800">Sale #{{ sale.id }} &mdash; {{ sale.customer.full_name }}</p>
+            <p class="text-[11px] text-gray-400">{{ sale.created_at|date:"M d, Y" }} &middot; ${{ sale.total_amount }}</p>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-xs text-gray-400">No sales yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Upcoming + Overdue Payments -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+        <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i>
+        <h3 class="text-sm font-semibold text-gray-800">Upcoming Payments</h3>
+      </div>
+      <table class="w-full text-xs">
+        <thead>
+          <tr class="text-gray-400 uppercase text-[10px] tracking-wide">
+            <th class="text-left font-semibold px-5 py-2">Customer</th>
+            <th class="text-left font-semibold px-2 py-2">Plan</th>
+            <th class="text-left font-semibold px-2 py-2">Due Date</th>
+            <th class="text-right font-semibold px-5 py-2">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in upcoming_payments %}
+          <tr class="border-t border-gray-50">
+            <td class="px-5 py-2.5 font-medium text-gray-800">{{ p.plan.sale.customer.full_name }}</td>
+            <td class="px-2 py-2.5 text-gray-500">INS-{{ p.plan.id }}</td>
+            <td class="px-2 py-2.5 text-gray-500">{{ p.due_date|date:"M d, Y" }}</td>
+            <td class="px-5 py-2.5 text-right font-semibold text-gray-800">${{ p.amount_due }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-5 py-4 text-gray-400 text-center">No upcoming payments.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600"></i>
+        <h3 class="text-sm font-semibold text-gray-800">Overdue Payments</h3>
+      </div>
+      <table class="w-full text-xs">
+        <thead>
+          <tr class="text-gray-400 uppercase text-[10px] tracking-wide">
+            <th class="text-left font-semibold px-5 py-2">Customer</th>
+            <th class="text-left font-semibold px-2 py-2">Plan</th>
+            <th class="text-left font-semibold px-2 py-2">Due Date</th>
+            <th class="text-right font-semibold px-5 py-2">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in overdue_payments %}
+          <tr class="border-t border-gray-50">
+            <td class="px-5 py-2.5 font-medium text-gray-800">{{ p.plan.sale.customer.full_name }}</td>
+            <td class="px-2 py-2.5 text-gray-500">INS-{{ p.plan.id }}</td>
+            <td class="px-2 py-2.5 text-rose-600">{{ p.due_date|date:"M d, Y" }}</td>
+            <td class="px-5 py-2.5 text-right font-semibold text-gray-800">${{ p.amount_due }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="px-5 py-4 text-gray-400 text-center">No overdue payments.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+  const ctx = document.getElementById('salesChart');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ chart_labels|safe }},
+      datasets: [{
+        label: 'Sales',
+        data: {{ chart_values|safe }},
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37, 99, 235, 0.08)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 3,
+        pointBackgroundColor: '#2563eb',
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#F1F5F9' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+</script>
+{% endblock %}

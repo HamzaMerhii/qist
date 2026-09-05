@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit Product{% else %}Add Product{% endif %} - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full flex items-start justify-center">
+    <div class="w-full max-w-lg">
+        <div class="mb-4">
+            <a href="{% url 'products:product_list' %}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Products
+            </a>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-6 pt-6 pb-5 border-b border-gray-50 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="package" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-gray-900">{% if object %}Edit Product{% else %}Add New Product{% endif %}</h1>
+                    <p class="text-xs text-gray-400 mt-0.5">Pricing, stock, and category for this catalog item.</p>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="px-6 py-6">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="mb-4 px-3 py-2.5 rounded-lg bg-rose-50 text-rose-600 text-xs font-medium border border-rose-100">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Product Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<p class="text-xs text-rose-600 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Category</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}<p class="text-xs text-rose-600 mt-1">{{ form.category.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Cost Price</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+                            {{ form.cost }}
+                        </div>
+                        {% if form.cost.errors %}<p class="text-xs text-rose-600 mt-1">{{ form.cost.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Selling Price</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+                            {{ form.price }}
+                        </div>
+                        {% if form.price.errors %}<p class="text-xs text-rose-600 mt-1">{{ form.price.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Stock Quantity</label>
+                    {{ form.stock_quantity }}
+                    {% if form.stock_quantity.errors %}<p class="text-xs text-rose-600 mt-1">{{ form.stock_quantity.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
+                        {% if object %}Save Changes{% else %}Create Product{% endif %}
+                    </button>
+                    <a href="{% url 'products:product_list' %}" class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-lg transition-colors">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    input[type="text"], input[type="number"], select {
+        width: 100%; padding: 0.55rem 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.5rem;
+        font-size: 0.875rem; outline: none; transition: border-color .15s, box-shadow .15s;
+        background-color: #fff;
+    }
+    input[type="number"] { padding-left: 1.5rem; }
+    input:focus, select:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+</style>
+{% endblock %}

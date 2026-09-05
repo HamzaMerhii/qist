@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Product Categories | QIST Management{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/products.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="page-header">
+        <div class="page-title">
+            <h1>Product Categories</h1>
+            <p>Organize your catalog items by grouping them into structured categories.</p>
+        </div>
+        <a href="{% url 'products:category_create' %}" class="primary-btn">
+            <span class="material-symbols-outlined">add</span>
+            Add Category
+        </a>
+    </div>
+
+    <div class="stats-grid category-stats">
+        <div class="stat-card">
+            <div class="stat-card-content">
+                <span class="stat-label">Total Categories</span>
+                <span class="stat-value">{{ categories.count|default:"0" }}</span>
+                <span class="stat-description">Active categories in database</span>
+            </div>
+            <div class="stat-icon">
+                <span class="material-symbols-outlined">category</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="inventory-card">
+        <div class="table-wrapper">
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Slug / Code</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in page_obj %}
+                    <tr>
+                        <td class="product-name">{{ category.name }}</td>
+                        <td class="product-id">{{ category.slug|default:category.id }}</td>
+                        <td style="text-align: right;">
+                            <div class="actions" style="justify-content: flex-end;">
+                                <a href="{% url 'products:category_update' category.pk %}" class="action-btn" title="Edit">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </a>
+                                <a href="{% url 'products:category_delete' category.pk %}" class="action-btn delete" title="Delete">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <span class="material-symbols-outlined">category</span>
+                                </div>
+                                <h3>No Categories Found</h3>
+                                <p>Start by creating categories to organize your product inventory.</p>
+                                <a href="{% url 'products:category_create' %}" class="primary-btn">Add Category</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

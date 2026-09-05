@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Installment Plans - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Installment Plans</h1>
+        <p class="text-sm text-gray-400 mt-0.5">Track active payment plans and their remaining balances.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-gray-100">
+            <form method="get" class="flex gap-2">
+                <div class="relative flex-1 max-w-sm">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" name="search" value="{{ search_query }}"
+                           placeholder="Search sale ID, customer, status..."
+                           class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400">
+                </div>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Search</button>
+            </form>
+        </div>
+
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-gray-400 uppercase text-[11px] tracking-wide">
+                    <th class="text-left font-semibold px-5 py-3">Plan #</th>
+                    <th class="text-left font-semibold px-3 py-3">Sale #</th>
+                    <th class="text-left font-semibold px-3 py-3">Customer</th>
+                    <th class="text-left font-semibold px-3 py-3">Remaining</th>
+                    <th class="text-left font-semibold px-3 py-3">Status</th>
+                    <th class="text-right font-semibold px-5 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plan in page_obj %}
+                <tr class="border-t border-gray-50 hover:bg-gray-50/60">
+                    <td class="px-5 py-3 font-medium text-gray-800">#{{ plan.id }}</td>
+                    <td class="px-3 py-3 text-gray-500">Sale #{{ plan.sale.id }}</td>
+                    <td class="px-3 py-3 text-gray-500">{{ plan.sale.customer.full_name }}</td>
+                    <td class="px-3 py-3 font-semibold text-gray-800">${{ plan.remaining_balance }}</td>
+                    <td class="px-3 py-3">
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold
+                            {% if plan.status == 'ACTIVE' %}bg-blue-50 text-blue-600
+                            {% elif plan.status == 'COMPLETED' %}bg-emerald-50 text-emerald-600
+                            {% else %}bg-gray-100 text-gray-500{% endif %}">
+                            {{ plan.status }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                        <a href="{% url 'installments:plan_detail' plan.pk %}"
+                           class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 text-xs font-semibold">
+                            View Schedule <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-5 py-10 text-center text-gray-400">No installment plans found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

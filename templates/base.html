@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Qist Admin Dashboard{% endblock %}</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Font (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Material Symbols (used across Products, Users, Reports, Customer Detail) -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-[#F6F8FB] text-gray-800 flex h-screen overflow-hidden">
+
+  <!-- Sidebar Component -->
+  {% include 'includes/sidebar.html' %}
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col overflow-y-auto">
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

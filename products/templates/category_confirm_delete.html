@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delete Category | QIST Management{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/products.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content delete-page">
+    <div class="delete-card">
+        <div class="delete-icon">
+            <span class="material-symbols-outlined">delete</span>
+        </div>
+        <h1>Delete Category</h1>
+        <p class="delete-warning">Are you sure you want to delete category <strong>"{{ object.name }}"</strong>?</p>
+
+        <div class="delete-note">
+            <span class="material-symbols-outlined">warning</span>
+            <div>
+                Deleting this category may unassign or affect products assigned to it.
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="delete-actions">
+                <a href="{% url 'products:category_list' %}" class="secondary-btn">Cancel</a>
+                <button type="submit" class="danger-btn">Confirm Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

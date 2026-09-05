@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Sales Returns - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Sales Returns</h1>
+            <p class="text-sm text-gray-400 mt-0.5">All processed refunds and returned items.</p>
+        </div>
+        <a href="{% url 'sales:sale_list' %}"
+           class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Sales
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-gray-100">
+            <form method="get" class="flex gap-2">
+                <div class="relative flex-1 max-w-sm">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" name="search" value="{{ search_query }}"
+                           placeholder="Search by customer or sale ID..."
+                           class="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400">
+                </div>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Search</button>
+            </form>
+        </div>
+
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-gray-400 uppercase text-[11px] tracking-wide">
+                    <th class="text-left font-semibold px-5 py-3">Return ID</th>
+                    <th class="text-left font-semibold px-3 py-3">Original Sale</th>
+                    <th class="text-left font-semibold px-3 py-3">Customer</th>
+                    <th class="text-left font-semibold px-3 py-3">Refund</th>
+                    <th class="text-left font-semibold px-3 py-3">Reason</th>
+                    <th class="text-left font-semibold px-3 py-3">Date</th>
+                    <th class="text-right font-semibold px-5 py-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ret in page_obj %}
+                <tr class="border-t border-gray-50 hover:bg-gray-50/60">
+                    <td class="px-5 py-3 font-medium text-gray-800">#RET-{{ ret.id }}</td>
+                    <td class="px-3 py-3 text-blue-600">
+                        {% if ret.sale %}<a href="{% url 'sales:sale_detail' ret.sale.pk %}">#{{ ret.sale.id }}</a>{% else %}<span class="text-gray-400">Sale deleted</span>{% endif %}
+                    </td>
+                    <td class="px-3 py-3 text-gray-500">{{ ret.sale.customer.full_name|default:"—" }}</td>
+                    <td class="px-3 py-3">
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-600">${{ ret.refund_amount }}</span>
+                    </td>
+                    <td class="px-3 py-3 text-gray-500">{{ ret.reason|truncatechars:30 }}</td>
+                    <td class="px-3 py-3 text-gray-500">{{ ret.return_date|date:"M d, Y" }}</td>
+                    <td class="px-5 py-3 text-right">
+                        <a href="{% url 'sales:sale_return_detail' ret.pk %}" class="text-blue-600 hover:text-blue-700 text-xs font-semibold">View Details</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-5 py-10 text-center text-gray-400">No sales returns recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

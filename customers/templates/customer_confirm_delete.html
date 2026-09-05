@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Delete Customer - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full flex items-start justify-center">
+    <div class="w-full max-w-sm">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
+            <div class="w-11 h-11 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            </div>
+            <h2 class="text-base font-bold text-gray-900 mb-1">Delete Customer?</h2>
+            <p class="text-sm text-gray-500 mb-5">Are you sure you want to delete <strong class="text-gray-800">{{ customer.full_name }}</strong> ({{ customer.phone }})? This can't be undone.</p>
+
+            <form method="post" class="flex gap-3">
+                {% csrf_token %}
+                <button type="submit" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">Yes, Delete</button>
+                <a href="{% url 'customers:customer_list' %}" class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-lg transition-colors">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

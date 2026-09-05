@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Users - QIST ERP{% endblock %}
+
+{% block content %}
+<div class="p-6 bg-[#F6F8FB] min-h-full">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Users</h1>
+            <p class="text-sm text-gray-400 mt-0.5">Manage staff accounts and their roles.</p>
+        </div>
+        <a href="{% url 'users:user_create' %}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Add User
+        </a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <table class="w-full text-left min-w-[700px]">
+            <thead><tr class="bg-gray-50 border-b border-gray-100">
+                <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-5">Username</th>
+                <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-3">Email</th>
+                <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-3">Role</th>
+                <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-3">Status</th>
+                <th class="text-[11px] font-semibold text-gray-400 uppercase py-3 px-5 text-right">Actions</th>
+            </tr></thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for profile in profiles %}
+                <tr class="hover:bg-gray-50/60">
+                    <td class="py-3 px-5">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">{{ profile.user.username|slice:":2"|upper }}</div>
+                            <span class="text-sm font-semibold text-gray-800">{{ profile.user.username }}</span>
+                            {% if profile.user == request.user %}<span class="text-[10px] text-gray-400">(you)</span>{% endif %}
+                        </div>
+                    </td>
+                    <td class="py-3 px-3 text-sm text-gray-500">{{ profile.user.email|default:"—" }}</td>
+                    <td class="py-3 px-3">
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold
+                            {% if profile.role == 'ADMIN' %}bg-blue-50 text-blue-700
+                            {% else %}bg-gray-100 text-gray-600{% endif %}">{{ profile.get_role_display }}</span>
+                    </td>
+                    <td class="py-3 px-3">
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold {% if profile.user.is_active %}bg-emerald-50 text-emerald-700{% else %}bg-rose-50 text-rose-700{% endif %}">
+                            {{ profile.user.is_active|yesno:"Active,Inactive" }}
+                        </span>
+                    </td>
+                    <td class="py-3 px-5 text-right">
+                        <div class="flex items-center justify-end gap-1">
+                            <a href="{% url 'users:user_edit_role' profile.pk %}" class="p-1.5 rounded text-gray-500 hover:bg-gray-100 hover:text-blue-600 transition-colors" title="Edit role">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </a>
+                            {% if profile.user != request.user %}
+                            <form method="post" action="{% url 'users:user_toggle_active' profile.pk %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="p-1.5 rounded text-gray-500 hover:bg-gray-100 hover:text-rose-600 transition-colors" title="{% if profile.user.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                    <i data-lucide="{% if profile.user.is_active %}ban{% else %}check-circle{% endif %}" class="w-4 h-4"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="py-10 px-4 text-center text-sm text-gray-400">No users found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

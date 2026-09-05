@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Products & Services | QIST Management{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/products.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="page-header">
+        <div class="page-title">
+            <h1>Products & Services</h1>
+            <p>Manage your product inventory, pricing, and stock levels across categories.</p>
+        </div>
+        <a href="{% url 'products:product_create' %}" class="primary-btn">
+            <span class="material-symbols-outlined">add</span>
+            Add Product
+        </a>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-card-content">
+                <span class="stat-label">Total Products</span>
+                <span class="stat-value">{{ total_products|default:"0" }}</span>
+                <span class="stat-description">Active items in catalog</span>
+            </div>
+            <div class="stat-icon">
+                <span class="material-symbols-outlined">inventory_2</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-content">
+                <span class="stat-label">Low Stock Items</span>
+                <span class="stat-value">{{ low_stock_count|default:"0" }}</span>
+                <span class="stat-description">Requires reordering</span>
+            </div>
+            <div class="stat-icon">
+                <span class="material-symbols-outlined">warning</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card-content">
+                <span class="stat-label">Out of Stock</span>
+                <span class="stat-value">{{ out_of_stock_count|default:"0" }}</span>
+                <span class="stat-description">Currently unavailable</span>
+            </div>
+            <div class="stat-icon">
+                <span class="material-symbols-outlined">block</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Table Card -->
+    <div class="inventory-card">
+        <div class="toolbar">
+            <form method="get" action="{% url 'products:product_list' %}" class="category-search-form">
+                <div class="search-wrapper">
+                    <span class="material-symbols-outlined search-icon">search</span>
+                    <input type="text" name="search" value="{{ search_query|default:'' }}" placeholder="Search products or SKU...">
+                </div>
+                <button type="submit" class="secondary-btn search-submit-btn">Search</button>
+            </form>
+
+            <div class="filter-group">
+                <a href="{% url 'products:category_list' %}" class="secondary-btn">
+                    <span class="material-symbols-outlined">category</span>
+                    Manage Categories
+                </a>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>Product SKU / Code</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in page_obj %}
+                    <tr>
+                        <td class="product-id">#{{ product.id }}</td>
+                        <td class="product-name">{{ product.name }}</td>
+                        <td>{{ product.category.name|default:"Uncategorized" }}</td>
+                        <td class="product-price">${{ product.price }}</td>
+                        <td>{{ product.stock_quantity }}</td>
+                        <td>
+                            {% if product.stock_quantity > 10 %}
+                                <span class="status-badge status-in-stock">In Stock</span>
+                            {% elif product.stock_quantity > 0 %}
+                                <span class="status-badge status-low-stock">Low Stock</span>
+                            {% else %}
+                                <span class="status-badge status-out-of-stock">Out of Stock</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;">
+                            <div class="actions" style="justify-content: flex-end;">
+                                <a href="{% url 'products:product_update' product.pk %}" class="action-btn" title="Edit">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </a>
+                                <a href="{% url 'products:product_delete' product.pk %}" class="action-btn delete" title="Delete">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <span class="material-symbols-outlined">inventory_2</span>
+                                </div>
+                                <h3>No Products Found</h3>
+                                <p>Get started by creating your first product or adjusting your search query.</p>
+                                <a href="{% url 'products:product_create' %}" class="primary-btn">Add Product</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination-wrapper">
+            <span class="pagination-info">Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}"><span class="material-symbols-outlined">chevron_left</span></a>
+                {% endif %}
+                <span class="active">{{ page_obj.number }}</span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}"><span class="material-symbols-outlined">chevron_right</span></a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
